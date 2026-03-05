@@ -15,7 +15,7 @@ function App() {
   return (
     <BrowserRouter basename="/sales_lideranca">
       <Routes>
-        <Route path="/" element={<Navigate to="/login" />} />
+        <Route index element={<Navigate to="/login" />} />
         {/* Rota pública */}
         <Route path="/login" element={<Login onLogin={handleLogin}/>} />
 
