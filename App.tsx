@@ -13,7 +13,7 @@ function App() {
   };
   
   return (
-    <BrowserRouter>
+    <BrowserRouter basename="/sales_lideranca">
       <Routes>
         <Route path="/" element={<Navigate to="/login" />} />
         {/* Rota pública */}

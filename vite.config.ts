@@ -26,6 +26,6 @@ export default defineConfig(({ mode }) => {
           '@': path.resolve(__dirname, '.'),
         }
       },
-      base: "/sales_lideranca",
+      base: "/sales_lideranca/",
     };
 });

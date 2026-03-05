@@ -56,7 +56,7 @@ const Sidebar: React.FC<SidebarProps> = ({ currentPage, onPageChange }) => {
             RO
           </div>
           <div className="flex-1 overflow-hidden">
-            <p className="text-xs font-semibold truncate text-white">Ricardo Oliveira</p>
+            <p className="text-xs font-semibold truncate text-white">Pedro</p>
             <p className="text-[10px] text-slate-500 truncate">Gerente Logístico</p>
           </div>
           <button className="material-symbols-outlined text-slate-400 hover:text-red-400 text-sm transition-colors">logout</button>
