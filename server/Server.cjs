@@ -9,20 +9,35 @@ const puppeteer = require("puppeteer");
 const gerarDanfeHTML = require("./danfeTemplate.cjs")
 
 const app = express();
+
+const PORT = process.env.PORT || 5000;
+
+app.listen(PORT, () => {
+  console.log("Servidor rodando na porta", PORT);
+});
+
 app.use(cors({
-  origin: 'http://localhost:3000',
+  origin: ['http://localhost:3000',
+  "https://henriquesampaio27.github.io"],
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization']
 }));
 app.use(express.json());
 
 // conexão PostgreSQL
+// const pool = new Pool({
+//   user: "dev",
+//   host: "localhost",
+//   database: "sales",
+//   password: "relampago",
+//   port: 5432,
+// });
+
 const pool = new Pool({
-  user: "dev",
-  host: "localhost",
-  database: "sales",
-  password: "relampago",
-  port: 5432,
+  connectionString: process.env.DATABASE_URL,
+  ssl: {
+    rejectUnauthorized: false
+  }
 });
 
 const multer = require("multer");
