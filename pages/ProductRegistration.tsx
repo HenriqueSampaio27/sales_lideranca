@@ -14,7 +14,7 @@ const ProductRegistration: React.FC = () => {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [imagePreview, setImagePreview] = useState<File | null>(null);
   const [preview, setPreview] = useState<string | null>(null);
-
+  const base = "https://sales-backend-7q5y.onrender.com"
   const initialProduct = {
     id: "",
     product_name: "",
@@ -47,7 +47,7 @@ const ProductRegistration: React.FC = () => {
 
   const fetchProducts = async () => {
     try {
-      const response = await fetch("http://localhost:5000/product");
+      const response = await fetch(`${base}/product`);
 
       if (!response.ok) {
         throw new Error("Erro ao buscar clientes");
@@ -115,13 +115,13 @@ const ProductRegistration: React.FC = () => {
 
     if (editingProduct) {
       // editar
-      await fetch(`http://localhost:5000/product/${product.id}`, {
+      await fetch(`${base}/product/${product.id}`, {
         method: "PUT",
         body: formData,
       });
     } else {
       // criar
-      await fetch("http://localhost:5000/product", {
+      await fetch(`${base}/product`, {
         method: "POST",
         body: formData,
       });
@@ -155,7 +155,7 @@ const ProductRegistration: React.FC = () => {
   const handleDelete = async (id: string) => {
     if (!window.confirm('Tem certeza que deseja deletar?')) return;
     
-    await fetch(`http://localhost:5000/product/${id}`, {
+    await fetch(`${base}/product/${id}`, {
       method: "DELETE",
     });
 

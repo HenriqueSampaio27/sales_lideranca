@@ -12,6 +12,7 @@ const Login: React.FC<LoginProps> = ({ onLogin }) => {
   const navigate = useNavigate();
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
+  const base = "https://sales-backend-7q5y.onrender.com"
 
   const onLoginClick = async () => {
     try {

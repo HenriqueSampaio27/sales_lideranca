@@ -1,7 +1,10 @@
 import axios from "axios";
 
 export const login = async (username, password) => {
-  const response = await axios.post("http://localhost:5000/login", {
+
+  const base = "https://sales-backend-7q5y.onrender.com"
+
+  const response = await axios.post(`${base}/login`, {
     username,
     password,
   });

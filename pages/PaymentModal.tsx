@@ -50,7 +50,7 @@ export function PaymentModal({
     { method: "Dinheiro", value: "" },
     { method: "Cartão Crédito", value: "" },
   ]);
-
+  
   if (!isOpen) return null;
 
   // ==============================

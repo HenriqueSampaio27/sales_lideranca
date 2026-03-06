@@ -7,7 +7,7 @@ const StockManagement: React.FC = () => {
   const [search, setSearch] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 20;
-  
+  const base = "https://sales-backend-7q5y.onrender.com"
   const [outOfStockSize, setOutOfStockSize] = useState(0);
   const [belowMinimumSize, setBelowMinimumSize] = useState(0);
   
@@ -83,7 +83,7 @@ const StockManagement: React.FC = () => {
 
   const fetchProducts = async () => {
     try {
-      const response = await fetch("http://localhost:5000/product");
+      const response = await fetch(`${base}/product`);
 
       if (!response.ok) {
         throw new Error("Erro ao buscar produtos");

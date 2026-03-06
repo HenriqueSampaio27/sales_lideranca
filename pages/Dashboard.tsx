@@ -34,7 +34,7 @@ const Dashboard: React.FC = () => {
   const [totalPaid, setTotalPaid] = useState("")
   const [totalPedding, setTotalPedding] = useState("")
   const [estimated, setEstimated] = useState("")
-
+  const base = "https://sales-backend-7q5y.onrender.com"
   const formatCurrencyCompact = (value: number): string  => {
   const abs = Math.abs(value)
 
@@ -59,7 +59,7 @@ const Dashboard: React.FC = () => {
 
   const fetchProducts = async () => {
     try {
-      const response = await fetch("http://localhost:5000/product");
+      const response = await fetch(`${base}/product`);
 
       if (!response.ok) {
         throw new Error("Erro ao buscar produtos");
@@ -91,7 +91,7 @@ const Dashboard: React.FC = () => {
 
   const getInvoiceSummary = async () => {
     try {
-      const response = await fetch("http://localhost:5000/invoices");
+      const response = await fetch(`${base}/invoices`);
 
       if (!response.ok) {
         throw new Error("Erro ao buscar notas");
@@ -130,7 +130,7 @@ const Dashboard: React.FC = () => {
   const fetchChartData = async (period: string) => {
   try {
     const response = await fetch(
-      `http://localhost:5000/invoices/chart?period=${period}`
+      `${base}/invoices/chart?period=${period}`
     );
 
     if (!response.ok) {

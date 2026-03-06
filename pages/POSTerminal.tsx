@@ -31,16 +31,17 @@ const POSTerminal: React.FC = () => {
   const [isPaymentOpen, setIsPaymentOpen] = useState(false);
   const [isPendingModalOpen, setIsPendingModalOpen] = useState(false);
   const [invoiceID, setInvoiceID] = useState("")
-  
+  const base = "https://sales-backend-7q5y.onrender.com"
+
   const fetchClients = async () => {
-    const res = await fetch("http://localhost:5000/clients");
+    const res = await fetch(`${base}/clients`);
     const data = await res.json();
     setClients(data);
     setFilteredClients(data);
   };
 
   const searchClientByDocument = async (doc: string) => {
-    const res = await fetch("http://localhost:5000/clients");
+    const res = await fetch(`${base}/clients`);
     const data = await res.json();
 
     const found = data.find(
@@ -55,14 +56,14 @@ const POSTerminal: React.FC = () => {
   };
 
   const fetchProducts = async () => {
-    const res = await fetch("http://localhost:5000/product");
+    const res = await fetch(`${base}/product`);
     const data = await res.json();
     setProducts(data);
     setFilteredProducts(data);   
   };
 
   const searchProductByBarcode = async (barcode: string) => {
-    const res = await fetch("http://localhost:5000/product");
+    const res = await fetch(`${base}/product`);
     const data = await res.json();
 
     const found = data.find(
@@ -227,7 +228,7 @@ const POSTerminal: React.FC = () => {
   }));
 
   try {
-    const response = await fetch("http://localhost:5000/invoices", {
+    const response = await fetch(`${base}/invoices`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
@@ -263,7 +264,7 @@ const POSTerminal: React.FC = () => {
 
   const pdf = () => {
     console.log(invoiceID)
-    window.open(`http://localhost:5000/generate-danfe/${invoiceID}`, "_blank");
+    window.open(`${base}/generate-danfe/${invoiceID}`, "_blank");
   }
 
   const sendEmail = async () => {
@@ -272,7 +273,7 @@ const POSTerminal: React.FC = () => {
     
     try {
       const response = await fetch(
-        `http://localhost:5000/invoices/${invoiceID}/send-email`,
+        `${base}/invoices/${invoiceID}/send-email`,
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -303,7 +304,7 @@ const POSTerminal: React.FC = () => {
 
     const numero = selectedClient.phone.replace(/\D/g, "");
 
-    const linkPDF = `http://localhost:5000/generate-danfe/${invoiceID}`;
+    const linkPDF = `${base}/generate-danfe/${invoiceID}`;
 
     const mensagem = `Olá! Segue sua nota fiscal:\n${linkPDF}`;
 

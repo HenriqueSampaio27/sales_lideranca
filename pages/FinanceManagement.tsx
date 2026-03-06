@@ -8,7 +8,7 @@ const FinanceManagement: React.FC = () => {
   const indexOfLast = currentPage * itemsPerPage;
   const indexOfFirst = indexOfLast - itemsPerPage;
 
-  
+  const base = "https://sales-backend-7q5y.onrender.com"
   const [searchTerm, setSearchTerm] = useState("");
 const [statusFilter, setStatusFilter] = useState("");
 const [dateFilter, setDateFilter] = useState("");
@@ -108,7 +108,7 @@ const overduePercentage =
 
   const fetchFinancialNotes = async () => {
     try {
-      const response = await fetch("http://localhost:5000/financial-notes");
+      const response = await fetch(`${base}/financial-notes`);
 
       if (!response.ok) {
         throw new Error("Erro ao buscar notas");
@@ -171,7 +171,7 @@ const currentNotes = filteredNotes.slice(indexOfFirst, indexOfLast);
 const handlePayment = async () => {
   if (!selectedNote) return;
 
-  await fetch(`http://localhost:5000/invoices/${selectedNote.id}/pay`, {
+  await fetch(`${base}/invoices/${selectedNote.id}/pay`, {
     method: "PUT",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({
@@ -189,7 +189,7 @@ const handleDelete = async (id: number) => {
 
   if (!confirmDelete) return;
 
-  await fetch(`http://localhost:5000/invoices/${id}`, {
+  await fetch(`${base}/invoices/${id}`, {
     method: "DELETE",
   });
 
@@ -197,7 +197,7 @@ const handleDelete = async (id: number) => {
 };
 
 const handleOpenInvoicePDF = (invoiceId) => {
-  window.open(`http://localhost:5000/generate-danfe/${invoiceId}`, "_blank");
+  window.open(`${base}/generate-danfe/${invoiceId}`, "_blank");
 };
 
   useEffect(() => {

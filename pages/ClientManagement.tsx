@@ -11,7 +11,7 @@ const ClientManagement: React.FC = () => {
   const [todayClients, setTodayClients] = useState("")
   const [editingClient, setEditingClient] = useState(null);
   const [searchTerm, setSearchTerm] = useState("");
-
+  const base = "https://sales-backend-7q5y.onrender.com"
   const initialClient = {
     id: "",
     name: "",
@@ -43,7 +43,7 @@ const ClientManagement: React.FC = () => {
     e.preventDefault();
     
     try {
-      const response = await fetch("http://localhost:5000/clients", {
+      const response = await fetch(`${base}/clients`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -73,7 +73,7 @@ const ClientManagement: React.FC = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     if (editingClient) {
       // ✏️ EDITAR
-      await fetch(`http://localhost:5000/clients/${editingClient.id}`, {
+      await fetch(`${base}/clients/${editingClient.id}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(client),
@@ -91,7 +91,7 @@ const ClientManagement: React.FC = () => {
 
   async function fetchClients() {
     try {
-      const response = await fetch("http://localhost:5000/clients");
+      const response = await fetch(`${base}/clients`);
 
       if (!response.ok) {
         throw new Error("Erro ao buscar clientes");
@@ -112,7 +112,7 @@ const ClientManagement: React.FC = () => {
   const deleteClient = async (id: number) => {
     if (!window.confirm('Tem certeza que deseja deletar?')) return;
     
-    await fetch(`http://localhost:5000/clients/${id}`, {
+    await fetch(`${base}/clients/${id}`, {
       method: 'DELETE'
     });
 
@@ -157,7 +157,7 @@ const ClientManagement: React.FC = () => {
 
   useEffect(() => {
     fetchClients();
-    fetch('http://localhost:5000/clients/today')
+    fetch(`${base}/clients/today`)
     .then(res => res.json())
     .then(data => setTodayClients(data.total));
   }, []);
