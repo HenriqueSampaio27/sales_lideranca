@@ -625,7 +625,7 @@ async function generateDanfePDF(invoiceId) {
   const html = gerarDanfeHTML(data, items);
 
   const browser = await puppeteer.launch({
-    headless: "new",
+    headless: "true",
     args: ["--no-sandbox", "--disable-setuid-sandbox"]
   });
 
@@ -695,7 +695,7 @@ app.get("/generate-danfe/:id", async (req, res) => {
   const html = gerarDanfeHTML(data, items);
  
     const browser = await puppeteer.launch({
-      headless: "new",
+      headless: "true",
       args: ["--no-sandbox", "--disable-setuid-sandbox"]
     });
 
