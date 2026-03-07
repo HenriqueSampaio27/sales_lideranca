@@ -409,7 +409,7 @@ const ProductRegistration: React.FC = () => {
                         <td className="px-8 py-5">
                           <div className="flex items-center gap-4">
                             <div className="size-12 rounded-xl bg-background-dark border border-border-dark overflow-hidden group-hover:border-primary/50 transition-colors">
-                              <img src={`${base}/${prod.image}`}
+                              <img src={`https://henriquesampaio27.github.io/${prod.image}`}
                                 alt={prod.product_name} className="size-full object-contain p-1"
                                 onError={(e) => {
                                   e.currentTarget.src = "/padrao.jpeg";
