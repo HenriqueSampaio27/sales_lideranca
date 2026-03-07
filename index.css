@@ -1,9 +1,17 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import "tailwindcss";
 
 /* estilos globais */
+@theme {
+  /* Cores Personalizadas */
+  --color-primary: #ffd900;
+  --color-background-dark: #0f0f0f;
+  --color-surface-dark: #1a1a1a;
+  --color-border-dark: #2d2d2d;
+  --color-accent-dark: #2a2a2a;
 
+  /* Fonte */
+  --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
+}
 body {
   font-family: 'Inter', sans-serif;
   background-color: #0f0f0f;
