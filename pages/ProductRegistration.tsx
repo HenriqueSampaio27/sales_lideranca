@@ -42,6 +42,10 @@ const ProductRegistration: React.FC = () => {
 
   useEffect(() => {
       fetchProducts();
+    }, []);
+
+    useEffect(() => {
+      
       calcPriceCost();
     }, [product.sale_price]);
 
