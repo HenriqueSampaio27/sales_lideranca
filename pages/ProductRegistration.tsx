@@ -1,5 +1,6 @@
 
 import React, { useEffect, useRef, useState } from 'react';
+import fotoPadrao from '../assets/padrao.jpeg';
 import { MOCK_PRODUCTS } from '../constants';
 
 const ProductRegistration: React.FC = () => {
@@ -409,11 +410,12 @@ const ProductRegistration: React.FC = () => {
                         <td className="px-8 py-5">
                           <div className="flex items-center gap-4">
                             <div className="size-12 rounded-xl bg-background-dark border border-border-dark overflow-hidden group-hover:border-primary/50 transition-colors">
-                              <img src={`https://henriquesampaio27.github.io/${prod.image}`}
+                              <img src={prod.image ? `${base}${prod.image}` : fotoPadrao}
                                 alt={prod.product_name} className="size-full object-contain p-1"
                                 onError={(e) => {
-                                  e.currentTarget.src = "/padrao.jpeg";
-                                }}
+                                    e.currentTarget.onerror = null; 
+                                    e.currentTarget.src = fotoPadrao;
+                                  }}
                                 />
                             </div>
                             <span className="text-sm font-black text-white uppercase group-hover:text-primary transition-colors">{prod.product_name}</span>
