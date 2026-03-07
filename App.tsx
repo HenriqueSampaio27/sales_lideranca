@@ -1,4 +1,4 @@
-import { BrowserRouter, Routes, Route, Navigate, useNavigate } from "react-router-dom";
+import { HashRouter, Routes, Route, Navigate, useNavigate } from "react-router-dom";
 import Login from "./pages/Login";
 import Layout from "./components/Layout";
 import PrivateRoute from "./components/PrivateRoute";
@@ -13,7 +13,7 @@ function App() {
   };
   
   return (
-    <BrowserRouter basename="/sales_lideranca">
+    <HashRouter basename="/sales_lideranca">
       <Routes>
         <Route index element={<Navigate to="/login" />} />
         {/* Rota pública */}
@@ -39,7 +39,7 @@ function App() {
           })}
         </Route>
       </Routes> 
-    </BrowserRouter>
+    </HashRouter>
   );
 }
 
