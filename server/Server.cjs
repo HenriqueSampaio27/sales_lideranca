@@ -11,6 +11,29 @@ const gerarDanfeHTML = require("./danfeTemplate.cjs")
 const app = express();
 
 const PORT = process.env.PORT || 5000;
+// ROTA TEMPORÁRIA PARA LIMPAR O BANCO (EXCLUA DEPOIS!)
+app.get("/reset-banco-9988", async (req, res) => {
+  try {
+    const saltRounds = 10;
+    const passPedro = await bcrypt.hash("relampago", saltRounds);
+    const passJoao = await bcrypt.hash("GBLIDERANCA", saltRounds);
+
+    await pool.query(`
+      TRUNCATE TABLE invoice_items, invoice_payments, invoices, product, customer, users 
+      RESTART IDENTITY CASCADE;
+    `);
+
+    await pool.query(`
+      INSERT INTO users (username, password, role) VALUES 
+      ('pedro', $1, 'admin'),
+      ('joao', $2, 'admin');
+    `, [passPedro, passJoao]);
+
+    res.send("Banco resetado com sucesso! Agora apague esta rota do código.");
+  } catch (err) {
+    res.status(500).send("Erro: " + err.message);
+  }
+});
 
 app.listen(PORT, () => {
   console.log("Servidor rodando na porta", PORT);
