@@ -13,7 +13,7 @@ function App() {
   };
   
   return (
-    <HashRouter basename="/sales_lideranca">
+    <HashRouter>
       <Routes>
         <Route index element={<Navigate to="/login" />} />
         {/* Rota pública */}
