@@ -59,6 +59,7 @@ const POSTerminal: React.FC = () => {
     const res = await fetch(`${base}/product`);
     const data = await res.json();
     setProducts(data);
+    console.log(data)
     setFilteredProducts(data);   
   };
 
