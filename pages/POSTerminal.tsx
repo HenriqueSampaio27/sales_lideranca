@@ -699,8 +699,8 @@ const POSTerminal: React.FC = () => {
                     </div>
 
                     <div>
-                      <p className="font-black text-white text-lg uppercase tracking-tight group-hover:text-primary transition-colors">
-                        {product.product_mark}
+                      <p className="text-slate-500 text-xs font-bold uppercase tracking-widest mt-1">
+                        {product.mark}
                       </p>
                     </div>
 
