@@ -639,7 +639,7 @@ async function generateDanfePDF(invoiceId) {
   const html = gerarDanfeHTML(data, items);
 
   const browser = await puppeteer.launch({
-    headless: "true",
+    headless: true,
     args: ["--no-sandbox", "--disable-setuid-sandbox"]
   });
 
@@ -709,7 +709,7 @@ app.get("/generate-danfe/:id", async (req, res) => {
   const html = gerarDanfeHTML(data, items);
  
     const browser = await puppeteer.launch({
-      headless: "true",
+      headless: true,
       args: ["--no-sandbox", "--disable-setuid-sandbox"]
     });
 
@@ -842,4 +842,4 @@ app.post("/invoices/:id/send-email", async (req, res) => {
   }
 });
 
-app.listen(5000, () => console.log("Servidor rodando na porta 5000"));
+//app.listen(5000, () => console.log("Servidor rodando na porta 5000"));

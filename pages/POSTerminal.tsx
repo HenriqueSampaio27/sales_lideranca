@@ -698,6 +698,12 @@ const POSTerminal: React.FC = () => {
                       </p>
                     </div>
 
+                    <div>
+                      <p className="font-black text-white text-lg uppercase tracking-tight group-hover:text-primary transition-colors">
+                        {product.product_mark}
+                      </p>
+                    </div>
+
                     <div className="text-right">
                       <p className="text-primary font-black text-xl font-mono">
                         R$ {Number(product.sale_price).toFixed(2)}

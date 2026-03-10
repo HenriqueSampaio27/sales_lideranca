@@ -215,14 +215,14 @@ const ProductRegistration: React.FC = () => {
                 <label className="block text-[10px] font-black uppercase tracking-[0.2em] mb-2.5 text-slate-500 group-focus-within:text-primary transition-colors">Nome do Produto</label>
                 <input value={product.product_name}
                   onChange={(e) =>
-                    setProduct({ ...product, product_name: e.target.value })
+                    setProduct({ ...product, product_name: e.target.value.toUpperCase() })
                     } className="w-full bg-background-dark border-border-dark rounded-xl px-5 py-4 text-sm focus:ring-2 focus:ring-primary focus:border-primary outline-none transition-all text-white placeholder:text-slate-700 font-bold" placeholder="Ex: Caixa monofásica" type="text"/>
               </div>
               <div className="group">
                 <label className="block text-[10px] font-black uppercase tracking-[0.2em] mb-2.5 text-slate-500 group-focus-within:text-primary transition-colors">Marca</label>
                 <input value={product.mark}
                   onChange={(e) =>
-                    setProduct({ ...product, mark: e.target.value })
+                    setProduct({ ...product, mark: e.target.value.toUpperCase() })
                     } className="w-full bg-background-dark border-border-dark rounded-xl px-5 py-4 text-sm focus:ring-2 focus:ring-primary focus:border-primary outline-none transition-all text-white font-mono font-bold" placeholder="Krona" type="text"/>
               </div>
               <div className="group">
