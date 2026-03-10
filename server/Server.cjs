@@ -640,7 +640,11 @@ async function generateDanfePDF(invoiceId) {
 
   const browser = await puppeteer.launch({
     headless: true,
-    args: ["--no-sandbox", "--disable-setuid-sandbox"]
+    args: [
+      "--no-sandbox",
+      "--disable-setuid-sandbox",
+      "--disable-dev-shm-usage"
+    ]
   });
 
   const page = await browser.newPage();
@@ -710,7 +714,11 @@ app.get("/generate-danfe/:id", async (req, res) => {
  
     const browser = await puppeteer.launch({
       headless: true,
-      args: ["--no-sandbox", "--disable-setuid-sandbox"]
+      args: [
+        "--no-sandbox",
+        "--disable-setuid-sandbox",
+        "--disable-dev-shm-usage"
+      ]
     });
 
     const page = await browser.newPage();

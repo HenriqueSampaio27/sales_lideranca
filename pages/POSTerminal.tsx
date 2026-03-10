@@ -58,9 +58,12 @@ const POSTerminal: React.FC = () => {
   const fetchProducts = async () => {
     const res = await fetch(`${base}/product`);
     const data = await res.json();
-    setProducts(data);
-    console.log(data)
-    setFilteredProducts(data);   
+      const sorted = data.sort((a, b) =>
+      a.product_name.localeCompare(b.product_name)
+    );
+
+    setProducts(sorted);
+    setFilteredProducts(sorted);  
   };
 
   const searchProductByBarcode = async (barcode: string) => {
@@ -699,7 +702,7 @@ const POSTerminal: React.FC = () => {
                       </p>
                     </div>
 
-                    <div>
+                    <div className="flex-1 text-center">
                       <p className="text-slate-500 text-xs font-bold uppercase tracking-widest mt-1">
                         {product.mark}
                       </p>
