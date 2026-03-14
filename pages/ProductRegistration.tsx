@@ -144,7 +144,7 @@ const ProductRegistration: React.FC = () => {
 
     if (!sale || sale <= 0) return;
 
-    const cost = sale - (sale * 0.41);
+    const cost = sale - (sale * 0.375);
 
     setProduct(prev => ({
       ...prev,
