@@ -68,7 +68,7 @@ const Dashboard: React.FC = () => {
       const data = await response.json();
       
       //const subTotal =  cart.reduce((acc, item) => acc + (item.qty * item.unit), 0);
-      const value = formatCurrencyCompact(data.reduce((acc, item) => acc + Number(item.price_cost), 0))
+      const value = formatCurrencyCompact(data.reduce((acc, item) => acc + (Number(item.stock) * Number(item.price_cost)), 0))
       let stock = 0
       let minStock = 0
       
