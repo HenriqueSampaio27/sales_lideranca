@@ -397,7 +397,7 @@ const ProductRegistration: React.FC = () => {
           <h3 className="text-2xl font-black text-white uppercase tracking-tighter">Produtos Existentes</h3>
           <div className="flex gap-3">
             <div className="relative group">
-              <input value={searchTerm}
+              <input value={search}
                       onChange={(e) => setSearch(e.target.value)}
                       className="bg-surface-dark border-border-dark rounded-xl pl-11 pr-4 py-3 text-sm focus:ring-2 focus:ring-primary w-80 outline-none transition-all text-white font-bold placeholder:text-slate-700" placeholder="Buscar por nome ou Código..." type="text"/>
               <span className="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-slate-600 text-lg group-focus-within:text-primary transition-colors">search</span>
