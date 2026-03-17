@@ -15,6 +15,7 @@ const ProductRegistration: React.FC = () => {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [imagePreview, setImagePreview] = useState<File | null>(null);
   const [preview, setPreview] = useState<string | null>(null);
+  const [showToast, setShowToast] = useState(false);
   const base = "https://sales-backend-7q5y.onrender.com"
   const initialProduct = {
     id: "",
@@ -117,26 +118,39 @@ const ProductRegistration: React.FC = () => {
     if (image) {
       formData.append("image", image);
     }
+    try{
+      if (editingProduct) {
+        // editar
+        await fetch(`${base}/product/${product.id}`, {
+          method: "PUT",
+          body: formData,
+        });
+      } else {
+        // criar
+        await fetch(`${base}/product`, {
+          method: "POST",
+          body: formData,
+        });
+      }
 
-    if (editingProduct) {
-      // editar
-      await fetch(`${base}/product/${product.id}`, {
-        method: "PUT",
-        body: formData,
-      });
-    } else {
-      // criar
-      await fetch(`${base}/product`, {
-        method: "POST",
-        body: formData,
-      });
+      setEditingProduct(null);
+      setProduct(initialProduct);
+      fetchProducts();
+      setImagePreview(null)
+      setPreview(null)
+
+      await fetchProducts();
+
+      // ✅ 🔥 AQUI entra o toast
+      setShowToast(true);
+
+      setTimeout(() => {
+        setShowToast(false);
+      }, 3000);
+
+    } catch (error){
+      console.error(error)
     }
-
-    setEditingProduct(null);
-    setProduct(initialProduct);
-    fetchProducts();
-    setImagePreview(null)
-    setPreview(null)
   };
 
   function calcPriceCost() {
@@ -155,6 +169,12 @@ const ProductRegistration: React.FC = () => {
   const handleEdit = (prod: any) => {
     setEditingProduct(prod)
     setProduct(prod);
+
+    window.scrollTo({
+    top: 0,
+    behavior: "smooth", // animação suave
+  });
+
   };
 
   const handleDelete = async (id: string) => {
@@ -460,6 +480,24 @@ const ProductRegistration: React.FC = () => {
           </div>
         </div>
       </section>
+
+      {/* Toast Notification Simulation */}
+      {showToast && (
+        <div className="fixed bottom-8 right-8 z-[200] animate-in slide-in-from-right duration-700">
+          <div className="bg-surface-dark border-l-4 border-primary p-5 rounded-2xl shadow-[0_20px_50px_rgba(0,0,0,0.5)] flex items-center gap-5 min-w-[340px] border border-border-dark">
+            <div className="bg-primary/20 size-12 rounded-full flex items-center justify-center shadow-inner">
+              <span className="material-symbols-outlined text-primary text-2xl font-black">check_circle</span>
+            </div>
+            <div>
+              <p className="text-base font-black text-white uppercase tracking-tight">Pronto!</p>
+              <p className="text-xs text-slate-500 font-bold uppercase tracking-widest mt-0.5">Operação realizada com sucesso.</p>
+            </div>
+            <button className="ml-auto text-slate-600 hover:text-white transition-colors">
+              <span className="material-symbols-outlined text-xl">close</span>
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
