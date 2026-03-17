@@ -5,12 +5,12 @@ import { MOCK_PRODUCTS } from '../constants';
 
 const ProductRegistration: React.FC = () => {
 
+  const topRef = useRef<HTMLDivElement>(null);
   const [search, setSearch] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
   const [products, setProducts] = useState<any[]>([]);
   const itemsPerPage = 20;
   const [editingProduct, setEditingProduct] = useState(null);
-  const [searchTerm, setSearchTerm] = useState("");
   const [image, setImage] = useState<File | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [imagePreview, setImagePreview] = useState<File | null>(null);
@@ -170,10 +170,10 @@ const ProductRegistration: React.FC = () => {
     setEditingProduct(prod)
     setProduct(prod);
 
-    window.scrollTo({
-    top: 0,
-    behavior: "smooth", // animação suave
-  });
+    topRef.current?.scrollIntoView({
+      behavior: "smooth",
+      block: "start",
+    });
 
   };
 
@@ -189,7 +189,7 @@ const ProductRegistration: React.FC = () => {
 
   const filteredProducts = products.filter((prod: any) =>
     prod.product_name.toLowerCase().includes(search.toLowerCase()) ||
-    prod.barcode?.toLowerCase().includes(searchTerm.toLowerCase())
+    prod.barcode?.toLowerCase().includes(search.toLowerCase())
   );
 
   const indexOfLast = currentPage * itemsPerPage;
@@ -208,7 +208,7 @@ const ProductRegistration: React.FC = () => {
 
   
   return (
-    <div className="p-8 space-y-10 animate-in fade-in slide-in-from-right-8 duration-500">
+    <div className="p-8 space-y-10 animate-in fade-in slide-in-from-right-8 duration-500" ref={topRef}>
       <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 border-b border-border-dark pb-6">
         <div>
           <h2 className="text-4xl font-black text-white tracking-tighter uppercase">Cadastro de Produtos</h2>
@@ -398,7 +398,9 @@ const ProductRegistration: React.FC = () => {
           <div className="flex gap-3">
             <div className="relative group">
               <input value={search}
-                      onChange={(e) => setSearch(e.target.value)}
+                      onChange={(e) => 
+                        {setSearch(e.target.value);
+                        setCurrentPage(1)}}
                       className="bg-surface-dark border-border-dark rounded-xl pl-11 pr-4 py-3 text-sm focus:ring-2 focus:ring-primary w-80 outline-none transition-all text-white font-bold placeholder:text-slate-700" placeholder="Buscar por nome ou Código..." type="text"/>
               <span className="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-slate-600 text-lg group-focus-within:text-primary transition-colors">search</span>
             </div>
@@ -467,7 +469,7 @@ const ProductRegistration: React.FC = () => {
             </table>
           </div>
           <div className="px-8 py-5 bg-black/20 border-t border-border-dark flex items-center justify-between">
-            <p className="text-[10px] text-slate-600 font-black uppercase tracking-widest">Exibindo {indexOfFirst + 1} - {Math.min(indexOfLast, products.length)} de {products.length} produtos</p>
+            <p className="text-[10px] text-slate-600 font-black uppercase tracking-widest">Exibindo {indexOfFirst + 1} - {Math.min(indexOfLast, filteredProducts.length)} de {filteredProducts.length} produtos</p>
             <div className="flex gap-2">
               <button disabled={currentPage === 1}
                 onClick={() => setCurrentPage(currentPage - 1)} 
