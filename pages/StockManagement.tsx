@@ -63,6 +63,7 @@ const StockManagement: React.FC = () => {
 
     const tableData = allCritical.map((p) => [
       p.product_name,
+      p.mark,
       p.stock,
       p.minStock,
       Number(p.stock) === 0 ? "ZERADO" : "ABAIXO DO MÍNIMO",
@@ -73,7 +74,7 @@ const StockManagement: React.FC = () => {
 
     autoTable(doc, {
       startY: 25,
-      head: [["Produto", "Qtd Atual", "Estoque Mínimo", "Status"]],
+      head: [["Produto", "Marca", "Qtd Atual", "Estoque Mínimo", "Status"]],
       body: tableData,
     });
 
