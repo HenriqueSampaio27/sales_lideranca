@@ -6,6 +6,7 @@ import ClientManagement from "../pages/ClientManagement";
 import Financial from "../pages/FinanceManagement";
 import POSTerminal from "../pages/POSTerminal";
 import { ComponentType } from "react";
+import Duplicate from "@/pages/Duplicate";
 
 type AppRoute = {
   path: string;
@@ -19,4 +20,5 @@ export const appRoutes: AppRoute[] = [
   { path: "/clients", component: ClientManagement},
   { path: "/financial", component: Financial },
   { path: "/pos", component: POSTerminal },
+  { path: "/duplicate", component: Duplicate}
 ];

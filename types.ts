@@ -6,7 +6,8 @@ export enum Page {
   REGISTRATION = 'registration',
   CLIENTS = 'clients',
   POS = 'pos',
-  FINANCIAL = 'financial'
+  FINANCIAL = 'financial',
+  DUPLICATE = 'duplicate',
 }
 
 export interface Product {
@@ -49,3 +50,21 @@ export interface FinancialNote {
   dueDate: string;
   status: 'vencido' | 'avencer' | 'parcial';
 }
+
+export interface Duplicate {
+  id: string;
+  client: string;
+  cnpj: string;
+  document: string;
+  dueDate: string;
+  value: number;
+  status: 'pending' | 'delayed' | 'paid';
+  initials: string;
+}
+
+export type NavItem = {
+  label: string;
+  icon: string;
+  active?: boolean;
+  danger?: boolean;
+};

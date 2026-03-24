@@ -169,7 +169,7 @@ const StockManagement: React.FC = () => {
                 <th className="px-8 py-5 text-[10px] font-black text-slate-600 uppercase tracking-widest">Marca</th>
                 <th className="px-6 py-4 text-right">Qtd Atual</th>
                 <th className="px-6 py-4 text-right">Estoque Mínimo</th>
-               
+                <th className="px-6 py-4 text-right">Ações</th>
               </tr>
             </thead>
 
@@ -196,6 +196,10 @@ const StockManagement: React.FC = () => {
                     {prod.stock}
                   </td>
 
+                  <td className="px-6 py-4 text-right text-slate-500">
+                    {prod.minStock}
+                  </td>
+                      
                   <td className="px-6 py-4 text-right text-slate-500">
                     {prod.minStock}
                   </td>

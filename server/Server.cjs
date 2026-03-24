@@ -5,7 +5,7 @@ const cors = require("cors");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 const { Pool } = require("pg");
-const puppeteer = require("puppeteer");
+const puppeteer = require("puppeteer-core");
 const gerarDanfeHTML = require("./danfeTemplate.cjs")
 
 const app = express();
@@ -713,12 +713,14 @@ app.get("/generate-danfe/:id", async (req, res) => {
   const html = gerarDanfeHTML(data, items);
  
     const browser = await puppeteer.launch({
-      headless: true,
+      executablePath: "/usr/bin/chromium",
       args: [
         "--no-sandbox",
         "--disable-setuid-sandbox",
-        "--disable-dev-shm-usage"
-      ]
+        "--disable-dev-shm-usage",
+        "--disable-gpu"
+      ],
+      headless: "new"
     });
 
     const page = await browser.newPage();
