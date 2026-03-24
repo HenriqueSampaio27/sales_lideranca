@@ -5,7 +5,7 @@ const cors = require("cors");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 const { Pool } = require("pg");
-const puppeteer = require("puppeteer-core");
+const puppeteer = require("puppeteer");
 const gerarDanfeHTML = require("./danfeTemplate.cjs")
 
 const app = express();
@@ -638,14 +638,17 @@ async function generateDanfePDF(invoiceId) {
   const data = invoice.rows[0];
   const html = gerarDanfeHTML(data, items);
 
-  const browser = await puppeteer.launch({
-    headless: true,
-    args: [
-      "--no-sandbox",
-      "--disable-setuid-sandbox",
-      "--disable-dev-shm-usage"
-    ]
-  });
+  
+    const browser = await puppeteer.launch({
+      executablePath: process.env.PUPPETEER_EXECUTABLE_PATH,
+      args: [
+        "--no-sandbox",
+        "--disable-setuid-sandbox",
+        "--disable-dev-shm-usage",
+        "--disable-gpu"
+      ],
+      headless: "new"
+    });
 
   const page = await browser.newPage();
   await page.setContent(html, { waitUntil: "networkidle0" });
@@ -713,7 +716,7 @@ app.get("/generate-danfe/:id", async (req, res) => {
   const html = gerarDanfeHTML(data, items);
  
     const browser = await puppeteer.launch({
-      executablePath: "/usr/bin/chromium",
+      executablePath: process.env.PUPPETEER_EXECUTABLE_PATH,
       args: [
         "--no-sandbox",
         "--disable-setuid-sandbox",

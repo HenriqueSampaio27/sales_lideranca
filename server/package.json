@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "start": "node server.js",
-    "postinstall": "npx puppeteer browsers install chrome"
+    "postinstall": "PUPPETEER_CACHE_DIR=./.cache/puppeteer npx puppeteer browsers install chrome"
   },
   "repository": {
     "type": "git",
@@ -30,7 +30,6 @@
     "multer": "^2.1.1",
     "nodemailer": "^8.0.1",
     "pg": "^8.20.0",
-    "puppeteer": "^24.38.0",
-    "puppeteer-core": "^24.40.0"
+    "puppeteer": "^24.38.0"
   }
 }
