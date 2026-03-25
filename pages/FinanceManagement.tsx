@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { baseUrl } from "../services/AuthService"
 
 const FinanceManagement: React.FC = () => {
   const [notes, setNotes] = useState<any[]>([]);
@@ -8,7 +9,7 @@ const FinanceManagement: React.FC = () => {
   const indexOfLast = currentPage * itemsPerPage;
   const indexOfFirst = indexOfLast - itemsPerPage;
 
-  const base = "https://sales-backend-7q5y.onrender.com"
+  const base = baseUrl
   const [searchTerm, setSearchTerm] = useState("");
 const [statusFilter, setStatusFilter] = useState("");
 const [dateFilter, setDateFilter] = useState("");

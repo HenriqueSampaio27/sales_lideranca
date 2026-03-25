@@ -6,6 +6,7 @@ const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 const { Pool } = require("pg");
 const puppeteer = require("puppeteer");
+const crypto = require("crypto");
 const gerarDanfeHTML = require("./danfeTemplate.cjs")
 
 const app = express();

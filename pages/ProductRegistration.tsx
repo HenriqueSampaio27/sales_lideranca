@@ -2,6 +2,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import fotoPadrao from '../assets/padrao.jpeg';
 import { MOCK_PRODUCTS } from '../constants';
+import { baseUrl } from "../services/AuthService"
 
 const ProductRegistration: React.FC = () => {
 
@@ -16,7 +17,7 @@ const ProductRegistration: React.FC = () => {
   const [imagePreview, setImagePreview] = useState<File | null>(null);
   const [preview, setPreview] = useState<string | null>(null);
   const [showToast, setShowToast] = useState(false);
-  const base = "https://sales-backend-7q5y.onrender.com"
+  const base = baseUrl
   const initialProduct = {
     id: "",
     product_name: "",

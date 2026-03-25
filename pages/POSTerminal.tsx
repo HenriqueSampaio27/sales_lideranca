@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useNavigate } from "react-router-dom";
 import { PaymentModal } from './PaymentModal';
 import { PendingAccountModal } from './PendentModal';
+import { baseUrl } from "../services/AuthService"
 
 const POSTerminal: React.FC = () => {
   
@@ -31,7 +32,7 @@ const POSTerminal: React.FC = () => {
   const [isPaymentOpen, setIsPaymentOpen] = useState(false);
   const [isPendingModalOpen, setIsPendingModalOpen] = useState(false);
   const [invoiceID, setInvoiceID] = useState("")
-  const base = "https://sales-backend-7q5y.onrender.com"
+  const base = baseUrl
 
   const fetchClients = async () => {
     const res = await fetch(`${base}/clients`);

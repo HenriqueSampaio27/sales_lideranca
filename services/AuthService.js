@@ -1,10 +1,12 @@
 import axios from "axios";
 
+export const baseUrl = "https://sales-lideranca.onrender.com"
+
 export const login = async (username, password) => {
 
-  const base = "https://sales-backend-7q5y.onrender.com"
+  //const base = "https://sales-backend-7q5y.onrender.com"
 
-  const response = await axios.post(`${base}/login`, {
+  const response = await axios.post(`${baseUrl}/login`, {
     username,
     password,
   });

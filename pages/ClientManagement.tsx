@@ -1,5 +1,6 @@
 
 import React, { useState, useRef, useEffect } from 'react';
+import { baseUrl } from "../services/AuthService"
 
 const ClientManagement: React.FC = () => {
   
@@ -11,7 +12,7 @@ const ClientManagement: React.FC = () => {
   const [todayClients, setTodayClients] = useState("")
   const [editingClient, setEditingClient] = useState(null);
   const [searchTerm, setSearchTerm] = useState("");
-  const base = "https://sales-backend-7q5y.onrender.com"
+  const base = baseUrl
   const initialClient = {
     id: "",
     name: "",

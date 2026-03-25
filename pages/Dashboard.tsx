@@ -23,6 +23,7 @@ import {
   CheckCircle2
 } from 'lucide-react';
 import { Form } from 'react-router-dom';
+import { baseUrl } from "../services/AuthService"
 
 const Dashboard: React.FC = () => {
   const [timeFilter, setTimeFilter] = useState<keyof typeof CHART_DATA>('30d');
@@ -34,7 +35,7 @@ const Dashboard: React.FC = () => {
   const [totalPaid, setTotalPaid] = useState("")
   const [totalPedding, setTotalPedding] = useState("")
   const [estimated, setEstimated] = useState("")
-  const base = "https://sales-backend-7q5y.onrender.com"
+  const base = baseUrl
   const formatCurrencyCompact = (value: number): string  => {
   const abs = Math.abs(value)
 

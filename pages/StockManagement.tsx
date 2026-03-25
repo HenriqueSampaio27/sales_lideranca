@@ -1,13 +1,14 @@
 import React, { useEffect, useState } from "react";
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
+import { baseUrl } from "../services/AuthService"
 
 const StockManagement: React.FC = () => {
   const [products, setProducts] = useState<any[]>([]);
   const [search, setSearch] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 20;
-  const base = "https://sales-backend-7q5y.onrender.com"
+  const base = baseUrl
   const [outOfStockSize, setOutOfStockSize] = useState(0);
   const [belowMinimumSize, setBelowMinimumSize] = useState(0);
   

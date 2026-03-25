@@ -3,6 +3,7 @@ import React from 'react';
 import { useState } from 'react';
 import { handleLogin } from '@/services/Authentication';
 import { useNavigate } from 'react-router-dom';
+import { baseUrl } from "../services/AuthService"
 
 interface LoginProps {
   onLogin: () => void;
@@ -12,7 +13,7 @@ const Login: React.FC<LoginProps> = ({ onLogin }) => {
   const navigate = useNavigate();
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
-  const base = "https://sales-backend-7q5y.onrender.com"
+  const base = baseUrl
 
   const onLoginClick = async () => {
     try {
