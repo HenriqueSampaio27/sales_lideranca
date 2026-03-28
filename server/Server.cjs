@@ -38,7 +38,7 @@ app.listen(PORT, async () => {
 app.use(cors({
   origin: ['http://localhost:3000',
   "https://henriquesampaio27.github.io"],
-  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  methods: ['GET', 'POST', 'PUT', "PATCH", 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization']
 }));
 app.use(express.json());
