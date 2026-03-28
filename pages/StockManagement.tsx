@@ -22,7 +22,7 @@ const StockManagement: React.FC = () => {
     try {
       const updated = { ...prod, active: !prod.active };
 
-      await fetch(`base/product/${prod.id}/active`, {
+      await fetch(`${base}/product/${prod.id}/active`, {
         method: "PATCH",
         headers: {
           "Content-Type": "application/json",
