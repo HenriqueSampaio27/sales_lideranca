@@ -59,7 +59,8 @@ const POSTerminal: React.FC = () => {
   const fetchProducts = async () => {
     const res = await fetch(`${base}/product`);
     const data = await res.json();
-      const sorted = data.sort((a, b) =>
+    const activeProducts = data.filter((p) => p.active === true);
+      const sorted = activeProducts.sort((a, b) =>
       a.product_name.localeCompare(b.product_name)
     );
 

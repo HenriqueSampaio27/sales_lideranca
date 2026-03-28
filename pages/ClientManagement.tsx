@@ -186,12 +186,12 @@ const ClientManagement: React.FC = () => {
         {/* Form Section */}
         <div className="lg:col-span-5 space-y-8">
           <div className="bg-surface-dark border border-border-dark rounded-2xl p-8 shadow-2xl relative overflow-hidden group">
-             <div className="absolute top-0 left-0 w-1.5 h-full bg-primary group-hover:w-2 transition-all"></div>
-             <div className="flex items-center gap-4 mb-10 pb-4 border-b border-border-dark">
+            <div className="absolute top-0 left-0 w-1.5 h-full bg-primary group-hover:w-2 transition-all"></div>
+            <div className="flex items-center gap-4 mb-10 pb-4 border-b border-border-dark">
                 <span className="material-symbols-outlined text-primary text-3xl">person_add</span>
                 <h2 className="text-2xl font-black text-white uppercase tracking-tight">Novo Cadastro</h2>
-             </div>
-             <form ref={formRef} onSubmit={handleSubmit} className="space-y-6">
+            </div>
+            <form ref={formRef} onSubmit={handleSubmit} className="space-y-6">
                 <div className="space-y-2 group">
                   <label className="text-[10px] font-black text-slate-500 uppercase tracking-[0.2em] group-focus-within:text-primary transition-colors">Nome Completo / Razão Social</label>
                   <input 
@@ -281,7 +281,7 @@ const ClientManagement: React.FC = () => {
                     {editingClient ? 'Cancelar edição' : 'Limpar'}
                   </button>
                 </div>
-             </form>
+            </form>
           </div>
 
           <div className="grid grid-cols-2 gap-6">
@@ -309,17 +309,16 @@ const ClientManagement: React.FC = () => {
         {/* Table Section */}
         <div className="lg:col-span-7 h-full">
           <div className="bg-surface-dark border border-border-dark rounded-2xl shadow-2xl overflow-hidden flex flex-col h-full">
-             <div className="px-8 py-6 border-b border-border-dark flex flex-col sm:flex-row sm:items-center justify-between gap-6 bg-black/20">
+            <div className="px-8 py-6 border-b border-border-dark flex flex-col sm:flex-row sm:items-center justify-between gap-6 bg-black/20">
                 <div className="flex items-center gap-4">
-                   <button onClick={() => fetchClients()}>
+                  <button onClick={() => fetchClients()}>
                     <span className="material-symbols-outlined text-slate-500 text-3xl">history</span>
                     </button>
-                   <h2 className="text-xl font-black text-white uppercase tracking-tight">Cadastros Recentes</h2>
-                   
+                  <h2 className="text-xl font-black text-white uppercase tracking-tight">Cadastros Recentes</h2>
                 </div>
               
                 <div className="flex items-center gap-2 bg-background-dark/50 rounded-xl p-1.5 border border-border-dark">
-                   <input
+                  <input
                       type="text"
                       placeholder="Pesquisar cliente..."
                       value={searchTerm}
@@ -327,8 +326,8 @@ const ClientManagement: React.FC = () => {
                       className="mt-2 sm:mt-0 sm:ml-auto px-4 py-2 rounded-xl bg-background-dark border border-border-dark text-white placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-primary"
                     />
                 </div>
-             </div>
-             <div className="overflow-x-auto custom-scrollbar flex-1">
+            </div>
+            <div className="overflow-x-auto custom-scrollbar flex-1">
                 <table className="w-full text-left">
                   <thead>
                     <tr className="bg-black/30 border-b border-border-dark">
@@ -376,27 +375,27 @@ const ClientManagement: React.FC = () => {
                     ))}
                   </tbody>
                 </table>
-             </div>
-             <div className="px-8 py-6 bg-black/30 border-t border-border-dark flex items-center justify-between">
+            </div>
+            <div className="px-8 py-6 bg-black/30 border-t border-border-dark flex items-center justify-between">
                 <span className="text-[10px] text-slate-600 font-black uppercase tracking-[0.2em]">Exibindo {indexOfFirstClient + 1} - {Math.min(indexOfLastClient, clients.length)} de {clients.length} clientes</span>
                 <div className="flex gap-2">
-                   <button 
-                   disabled={currentPage === 1}
-                   onClick={() => setCurrentPage((prev) => prev - 1)}
-                   
-                   className="px-5 py-2 text-[10px] font-black uppercase tracking-widest bg-background-dark text-slate-500 rounded-lg border border-border-dark hover:text-white transition-all">Anterior</button>
-                   <button disabled={currentPage === totalPages}
+                  <button 
+                  disabled={currentPage === 1}
+                  onClick={() => setCurrentPage((prev) => prev - 1)}
+                  
+                  className="px-5 py-2 text-[10px] font-black uppercase tracking-widest bg-background-dark text-slate-500 rounded-lg border border-border-dark hover:text-white transition-all">Anterior</button>
+                  <button disabled={currentPage === totalPages}
                     onClick={() => setCurrentPage((prev) => prev + 1)}
                     className="px-5 py-2 text-[10px] font-black uppercase tracking-widest bg-background-dark text-white rounded-lg border border-border-dark hover:bg-primary hover:text-background-dark transition-all">Próximo</button>
                 </div>
-             </div>
+            </div>
           </div>
         </div>
       </div>
       
       {/* Toast Notification Simulation */}
       {showToast && (
-        <div className="fixed bottom-8 right-8 z-[200] animate-in slide-in-from-right duration-700">
+        <div className="fixed bottom-8 right-8 z-200 animate-in slide-in-from-right duration-700">
           <div className="bg-surface-dark border-l-4 border-primary p-5 rounded-2xl shadow-[0_20px_50px_rgba(0,0,0,0.5)] flex items-center gap-5 min-w-[340px] border border-border-dark">
             <div className="bg-primary/20 size-12 rounded-full flex items-center justify-center shadow-inner">
               <span className="material-symbols-outlined text-primary text-2xl font-black">check_circle</span>

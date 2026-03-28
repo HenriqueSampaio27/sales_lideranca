@@ -18,14 +18,39 @@ const StockManagement: React.FC = () => {
     
   }, [products]);
 
+  const toggleActive = async (prod: any) => {
+    try {
+      const updated = { ...prod, active: !prod.active };
+
+      await fetch(`SEU_BACKEND/product/${prod.id}/active`, {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ active: !prod.active }),
+      });
+
+      // Atualiza na tela sem recarregar
+      setProducts((prev: any) =>
+        prev.map((p: any) =>
+          p.id === prod.id ? { ...p, active: !p.active } : p
+        )
+      );
+
+    } catch (err) {
+      console.error("Erro ao atualizar active", err);
+    }
+  };
+
   function checkStockStatus(products: any[]) {
     const outOfStock: any[] = [];
     const belowMinimum: any[] = [];
 
-    products.forEach((prod) => {
+    const activeProducts = products.filter((p) => p.active === true);
+
+    activeProducts.forEach((prod) => {
       const stock = Number(prod.stock);
       const minStock = Number(prod.minStock);
-     
       if (stock === 0) {
         outOfStock.push(prod);
       } else if (stock > 0 && stock <= minStock) {
@@ -45,11 +70,12 @@ const StockManagement: React.FC = () => {
   function generateStockReport(products: any[]) {
     const doc = new jsPDF();
 
-    const outOfStock = products.filter(
+    const activeProducts = products.filter((p) => p.active === true);
+    const outOfStock = activeProducts.filter(
       (p) => Number(p.stock) === 0
     );
 
-    const belowMinimum = products.filter(
+    const belowMinimum = activeProducts.filter(
       (p) =>
         Number(p.stock) > 0 &&
         Number(p.stock) <= Number(p.minStock)
@@ -201,8 +227,19 @@ const StockManagement: React.FC = () => {
                     {prod.minStock}
                   </td>
                       
-                  <td className="px-6 py-4 text-right text-slate-500">
-                    {prod.minStock}
+                  <td className="px-6 py-4 text-right">
+                    <button
+                      onClick={() => toggleActive(prod)}
+                      className={`w-12 h-6 flex items-center rounded-full p-1 transition-all duration-300 ${
+                        prod.active ? "bg-green-500" : "bg-gray-500"
+                      }`}
+                    >
+                      <div
+                        className={`bg-white w-4 h-4 rounded-full shadow-md transform transition-transform duration-300 ${
+                          prod.active ? "translate-x-6" : "translate-x-0"
+                        }`}
+                      />
+                    </button>
                   </td>
                   
                 </tr>

@@ -67,6 +67,7 @@ const ProductRegistration: React.FC = () => {
       
     } catch (error) {
       console.error(error);
+      window.alert("banco dormindo!");
     }
   };
 
@@ -142,7 +143,7 @@ const ProductRegistration: React.FC = () => {
 
       await fetchProducts();
 
-      // ✅ 🔥 AQUI entra o toast
+      //AQUI entra o toast
       setShowToast(true);
 
       setTimeout(() => {
@@ -151,6 +152,7 @@ const ProductRegistration: React.FC = () => {
 
     } catch (error){
       console.error(error)
+      window.alert("Erro ao cadastrar o produto!")
     }
   };
 

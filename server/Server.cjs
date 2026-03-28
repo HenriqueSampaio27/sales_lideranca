@@ -12,23 +12,27 @@ const gerarDanfeHTML = require("./danfeTemplate.cjs")
 const app = express();
 
 const PORT = process.env.PORT || 5000;
-// ROTA TEMPORÁRIA PARA LIMPAR O BANCO
-// app.get("/reset-banco-9988", async (req, res) => {
-//   try {
 
-//     await pool.query(`
-//       TRUNCATE TABLE invoice_items, invoice_payments, invoices, product, customer, users 
-//       RESTART IDENTITY CASCADE;
-//     `);
+async function runMigrations() {
+  try {
+    console.log("Rodando migrations...");
 
-//     res.send("Banco resetado com sucesso! apagar rota.");
-//   } catch (err) {
-//     res.status(500).send("Erro: " + err.message);
-//   }
-// });
+    await pool.query(`
+      ALTER TABLE product
+      ADD COLUMN IF NOT EXISTS active BOOLEAN NOT NULL DEFAULT TRUE;
+    `);
 
-app.listen(PORT, () => {
+    console.log("Coluna 'active' verificada/criada com sucesso!");
+
+  } catch (error) {
+    console.error("Erro ao rodar migrations:", error);
+  }
+}
+
+app.listen(PORT, async () => {
   console.log("Servidor rodando na porta", PORT);
+
+  await runMigrations();
 });
 
 app.use(cors({
@@ -38,15 +42,6 @@ app.use(cors({
   allowedHeaders: ['Content-Type', 'Authorization']
 }));
 app.use(express.json());
-
-// conexão PostgreSQL
-// const pool = new Pool({
-//   user: "dev",
-//   host: "localhost",
-//   database: "sales",
-//   password: "relampago",
-//   port: 5432,
-// });
 
 const pool = new Pool({
   connectionString: process.env.DATABASE_URL,
@@ -256,6 +251,24 @@ app.put('/product/:id', upload.single("image"), async (req, res) => {
     //res.status(500).json({ error: "Erro ao atualizar produto" });
     console.error("ERRO UPDATE:", err);
     res.status(500).json({ error: err.message });
+  }
+});
+
+app.patch('/product/:id/active', async (req, res) => {
+  const { id } = req.params;
+  const { active } = req.body;
+
+  try {
+    const result = await pool.query(
+      `UPDATE product SET active = $1 WHERE id = $2 RETURNING *`,
+      [active, id]
+    );
+
+    res.json(result.rows[0]);
+
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: "Erro ao atualizar active" });
   }
 });
 
