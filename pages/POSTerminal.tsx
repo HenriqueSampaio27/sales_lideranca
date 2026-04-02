@@ -215,7 +215,7 @@ const POSTerminal: React.FC = () => {
     finalySave(true, paymentData, null); // 👈 envia para salvar no backend
   };
 
- const finalySave = async (
+const finalySave = async (
   isPaid: boolean,
   paymentData: any | null,
   pendingInfo: { advanceAmount: number, dueDate: string } | null
@@ -250,15 +250,24 @@ const POSTerminal: React.FC = () => {
 
     const data = await response.json();
 
+    if (!response.ok) {
+      console.error("Erro do backend:", data);
+
+      // 👇 mostra erro real
+      alert(data.message || data.error || "Erro ao salvar venda");
+      return;
+    }
+
+    setCart([]);
+    setPayments([]);
+    setDiscount(0);
+    setSelectedClient(null);
+    setIsPaymentOpen(false);
+    
     const invoice = data.invoice_id;
       console.log("RESPOSTA BACKEND:", data);
       console.log("RESPOSTA BACKEND:", data.invoice_id);
       setInvoiceID(invoice)
-
-    if (!response.ok) {
-      alert("Erro ao salvar venda");
-      return;
-    }
 
   } catch (error) {
     console.error(error);
@@ -896,11 +905,7 @@ const POSTerminal: React.FC = () => {
         isOpen={isPaymentOpen}
         total={total}
         itemsCount={cart.reduce((a, b) => a + b.qty, 0)}
-        onClose={() => {setIsPaymentOpen(false), 
-          setCart([]),
-          setPayments([]),
-          setDiscount(0),
-          setSelectedClient(null)}}
+        onClose={() => {setIsPaymentOpen(false)}}
         onCancel={() => {}}
         onDestroy={() => pdf()}
         onConfirmPayment={handlePaymentConfirm}

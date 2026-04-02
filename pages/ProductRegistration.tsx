@@ -120,29 +120,31 @@ const ProductRegistration: React.FC = () => {
     if (image) {
       formData.append("image", image);
     }
-    try{
-      if (editingProduct) {
-        // editar
-        await fetch(`${base}/product/${product.id}`, {
-          method: "PUT",
-          body: formData,
-        });
-      } else {
-        // criar
-        await fetch(`${base}/product`, {
-          method: "POST",
-          body: formData,
-        });
+    try {
+      const url = editingProduct
+        ? `${base}/product/${product.id}`
+        : `${base}/product`;
+
+      const method = editingProduct ? "PUT" : "POST";
+
+      const response = await fetch(url, {
+        method,
+        body: formData,
+      });
+
+        const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.message || "Erro ao salvar produto");
       }
 
+      // sucesso
       setEditingProduct(null);
       setProduct(initialProduct);
-      fetchProducts();
-      setImagePreview(null)
-      setPreview(null)
+      setImagePreview(null);
+      setPreview(null);
 
       await fetchProducts();
-
       //AQUI entra o toast
       setShowToast(true);
 
@@ -151,8 +153,10 @@ const ProductRegistration: React.FC = () => {
       }, 3000);
 
     } catch (error){
-      console.error(error)
-      window.alert("Erro ao cadastrar o produto!")
+      console.error("Erro detalhado:", error);
+
+    // 👇 MOSTRA ERRO REAL
+      alert(error.message || "Erro ao cadastrar produto");
     }
   };
 
@@ -276,6 +280,9 @@ const ProductRegistration: React.FC = () => {
                   className="w-full bg-background-dark border-border-dark rounded-xl px-5 py-4 text-sm focus:ring-2 focus:ring-primary focus:border-primary outline-none transition-all text-white appearance-none font-bold">
                   <option>UN</option>
                   <option>KG</option>
+                  <option>M</option>
+                  <option>CX</option>
+                  <option>PCT</option>
                 </select>
               </div>
               <div className="md:col-span-1 group">

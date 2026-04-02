@@ -207,8 +207,26 @@ app.post('/product', upload.single("image"), async (req, res) => {
     res.status(201).json(result.rows[0]);
 
   } catch (err) {
-    console.error(err);
-    res.status(500).json({ error: "Erro ao salvar produto" });
+    console.error("Erro detalhado:", err);
+
+    // 👇 erro de constraint (ex: barcode duplicado)
+    if (err.code === "23505") {
+      return res.status(400).json({
+        message: "Produto com esse código de barras já existe"
+      });
+    }
+
+    // 👇 campo obrigatório vazio
+    if (err.code === "23502") {
+      return res.status(400).json({
+        message: `Campo obrigatório não informado: ${err.column}`
+      });
+    }
+
+    // 👇 erro genérico do banco
+    return res.status(500).json({
+      message: err.message || "Erro ao salvar produto"
+    });
   }
 });
 
@@ -401,9 +419,32 @@ app.post("/invoices", async (req, res) => {
 
   } catch (error) {
     await client.query("ROLLBACK");
-    console.error(error);
-    res.status(500).json({
-      error: error.message || "Erro ao finalizar venda",
+    console.error("Erro na venda:", error);
+
+    // 🔴 erro de estoque
+    if (error.message === "Estoque insuficiente") {
+      return res.status(400).json({
+        message: "Estoque insuficiente para um ou mais produtos"
+      });
+    }
+
+    // 🔴 erro de constraint do PostgreSQL
+    if (error.code === "23503") {
+      return res.status(400).json({
+        message: "Cliente ou produto inválido"
+      });
+    }
+
+    // 🔴 erro campo obrigatório
+    if (error.code === "23502") {
+      return res.status(400).json({
+        message: `Campo obrigatório não informado: ${error.column}`
+      });
+    }
+
+    // 🔴 fallback
+    return res.status(500).json({
+      message: error.message || "Erro ao finalizar venda"
     });
   } finally {
     client.release();
