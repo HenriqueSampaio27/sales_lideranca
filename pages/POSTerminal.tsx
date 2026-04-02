@@ -312,7 +312,7 @@ const POSTerminal: React.FC = () => {
 
     const linkPDF = `${base}/generate-danfe/${invoiceID}`;
 
-    const mensagem = `Olá! Segue sua nota fiscal:\n${linkPDF}`;
+    const mensagem = `Olá! Segue sua nota:\n${linkPDF}`;
 
     const url = `https://wa.me/55${numero}?text=${encodeURIComponent(mensagem)}`;
 

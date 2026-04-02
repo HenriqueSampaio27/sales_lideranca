@@ -13,7 +13,7 @@ function gerarDanfeHTML(data, items) {
 }, 0);
 
 const totalProduct = items.rows.reduce((acc, item) => {
-  return acc + Number(item.unit_price_original);
+  return acc + (Number(item.unit_price_original) * Number(item.quantity));
 }, 0);
 
 const totalDiscount = items.rows.reduce((acc, item) => {
