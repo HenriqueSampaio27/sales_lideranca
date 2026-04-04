@@ -25,6 +25,8 @@ const POSTerminal: React.FC = () => {
   const [discount, setDiscount] = useState(0);
   const [isDiscountModalOpen, setIsDiscountModalOpen] = useState(false);
   const [discountInput, setDiscountInput] = useState(""); 
+  const [isSaving, setIsSaving] = useState(false);
+  const [saleCompleted, setSaleCompleted] = useState(false);
   const [payments, setPayments] = useState<
     { method: string; amount: number }[]
   >([]);
@@ -223,6 +225,8 @@ const finalySave = async (
 
   if (cart.length === 0) return;
 
+  setIsSaving(true); // 🔄 começa loading
+
   const statusValue = isPaid ? "PAGO" : "PENDENTE";
 
   const items = cart.map((item) => ({
@@ -255,6 +259,7 @@ const finalySave = async (
 
       // 👇 mostra erro real
       alert(data.message || data.error || "Erro ao salvar venda");
+      setIsSaving(false);
       return;
     }
 
@@ -262,9 +267,10 @@ const finalySave = async (
     setPayments([]);
     setDiscount(0);
     setSelectedClient(null);
-    setIsPaymentOpen(false);
-    
+
     const invoice = data.invoice_id;
+      setSaleCompleted(true);
+      setIsSaving(false);
       console.log("RESPOSTA BACKEND:", data);
       console.log("RESPOSTA BACKEND:", data.invoice_id);
       setInvoiceID(invoice)
@@ -272,6 +278,7 @@ const finalySave = async (
   } catch (error) {
     console.error(error);
     alert("Erro na conexão com servidor");
+    setIsSaving(false);
   }
 };
 
@@ -908,9 +915,15 @@ const finalySave = async (
         onClose={() => {setIsPaymentOpen(false)}}
         onCancel={() => {}}
         onDestroy={() => pdf()}
+        isSaving={isSaving}
+        saleCompleted={saleCompleted}
         onConfirmPayment={handlePaymentConfirm}
         onSendEmail={sendEmail}
         onSendWhats={sendWhatsApp}
+        onResetSale={() => {
+          setSaleCompleted(false);
+          setIsPaymentOpen(false);
+        }}
       />
     )}
     {isPendingModalOpen && (

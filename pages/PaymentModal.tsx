@@ -22,6 +22,9 @@ interface PaymentModalProps {
   onConfirmPayment: (paymentData: any) => void;
   onSendWhats: () => void;
   onSendEmail: () => void;
+  isSaving: boolean;
+  saleCompleted: boolean;
+  onResetSale: () => void;
 }
 
 const paymentMethods = [
@@ -40,12 +43,14 @@ export function PaymentModal({
   onDestroy,
   onConfirmPayment,
   onSendWhats, 
-  onSendEmail
+  onSendEmail,
+  onResetSale,
+  isSaving,
+  saleCompleted
 }: PaymentModalProps) {
   const [isSplit, setIsSplit] = useState(false);
   const [methodSingle, setMethodSingle] = useState("Dinheiro");
   const [cashReceived, setCashReceived] = useState("");
-  const [paymentCompleted, setPaymentCompleted] = useState(false);
   const [splitPayments, setSplitPayments] = useState([
     { method: "Dinheiro", value: "" },
     { method: "Cartão Crédito", value: "" },
@@ -110,7 +115,16 @@ export function PaymentModal({
     }
 
     onConfirmPayment(paymentData);
-    setPaymentCompleted(true);
+  }
+
+  if (isSaving) {
+    return (
+      <div className="bg-[#111] p-10 rounded-2xl text-center">
+        <p className="text-yellow-400 text-2xl font-bold animate-pulse">
+          Salvando venda...
+        </p>
+      </div>
+    );
   }
 
   // ==============================
@@ -161,7 +175,7 @@ export function PaymentModal({
     <AnimatePresence>
       <motion.div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-4">
         
-          {paymentCompleted && 
+          {saleCompleted && 
             (<motion.div 
             animate={{ opacity: 1, x: 0 }}
             className="w-full max-w-md space-y-10 bg-[#111] p-8 rounded-2xl"
@@ -194,7 +208,7 @@ export function PaymentModal({
             </div>
 
             <div className="pt-3 border-t border-white/5">
-                <button onClick= {() => onClose()}className="w-full h-14 border-2 border-[#fcc000] text-[#fcc000] font-bold rounded-xl flex items-center justify-center gap-3 hover:bg-[#fcc000] hover:text-[#222115] transition-all">
+                <button onClick= {onResetSale} className="w-full h-14 border-2 border-[#fcc000] text-[#fcc000] font-bold rounded-xl flex items-center justify-center gap-3 hover:bg-[#fcc000] hover:text-[#222115] transition-all">
                 <ShoppingCart className="w-6 h-6" />
                 Nova Venda
                 </button>
@@ -202,7 +216,7 @@ export function PaymentModal({
             </motion.div>)}  
           
           {/* HEADER */}
-          {!paymentCompleted && (
+          {!saleCompleted && (
             <motion.div className="bg-[#0f0f0f] w-full max-w-3xl rounded-2xl border border-yellow-500/20 shadow-2xl">
             <div className="flex justify-between items-center px-8 py-6 border-b border-yellow-500/10">
             <h2 className="text-2xl font-black italic uppercase">
@@ -347,7 +361,7 @@ export function PaymentModal({
             {/* FINALIZAR */}
             <button
               disabled={!isPaid}
-              onClick = {() => {finish(), onCancel()}}
+              onClick = {finish}
               className={`w-full py-6 rounded-2xl font-black text-2xl uppercase italic transition ${
                 isPaid
                   ? "bg-yellow-400 text-black"
