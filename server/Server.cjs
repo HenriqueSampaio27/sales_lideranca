@@ -13,30 +13,14 @@ const app = express();
 
 const PORT = process.env.PORT || 5000;
 
-async function runMigrations() {
-  try {
-    console.log("Rodando migrations...");
-
-    await pool.query(`
-      ALTER TABLE product
-      ADD COLUMN IF NOT EXISTS active BOOLEAN NOT NULL DEFAULT TRUE;
-    `);
-
-    console.log("Coluna 'active' verificada/criada com sucesso!");
-
-  } catch (error) {
-    console.error("Erro ao rodar migrations:", error);
-  }
-}
-
-app.listen(PORT, async () => {
+app.listen(PORT, '0.0.0.0', async () => {
   console.log("Servidor rodando na porta", PORT);
 
-  await runMigrations();
 });
 
 app.use(cors({
   origin: ['http://localhost:3000',
+  'http://192.168.3.120:3000',
   "https://henriquesampaio27.github.io"],
   methods: ['GET', 'POST', 'PUT', "PATCH", 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization']
@@ -44,10 +28,7 @@ app.use(cors({
 app.use(express.json());
 
 const pool = new Pool({
-  connectionString: process.env.DATABASE_URL,
-  ssl: {
-    rejectUnauthorized: false
-  }
+  connectionString: process.env.DATABASE_URL
 });
 
 const multer = require("multer");
