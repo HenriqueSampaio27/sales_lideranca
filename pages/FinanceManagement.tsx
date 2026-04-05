@@ -128,44 +128,41 @@ const overduePercentage =
   const filteredNotes = notes.filter((note) => {
 
   // 🔎 FILTRO TEXTO (cliente ou documento ou número)
-  const matchesSearch =
-    note.customer_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    note.cnpj_cpf?.includes(searchTerm) ||
-    note.invoice_number?.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesSearch =
+      note.customer_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      note.cnpj_cpf?.includes(searchTerm) ||
+      note.invoice_number?.toLowerCase().includes(searchTerm.toLowerCase());
 
-  if (!matchesSearch) return false;
+    if (!matchesSearch) return false;
 
-  // 📌 FILTRO STATUS (calculado por data)
-  if (statusFilter) {
-    const dueDate = note.due_date ? new Date(note.due_date) : null;
-    if (dueDate) dueDate.setHours(0, 0, 0, 0);
+    // 📌 FILTRO STATUS (calculado por data)
+    if (statusFilter) {
+      const dueDate = note.due_date ? new Date(note.due_date) : null;
+      if (dueDate) dueDate.setHours(0, 0, 0, 0);
 
-    if (statusFilter === "vencido") {
-      if (!(note.status === "PENDENTE" && dueDate && dueDate < today)) return false;
+      if (statusFilter === "vencido") {
+        if (!(note.status === "PENDENTE" && dueDate && dueDate < today)) return false;
+      }
+
+      if (statusFilter === "avencer") {
+        if (!(note.status === "PENDENTE" && dueDate && dueDate >= today)) return false;
+      }
+
+      if (statusFilter === "parcial") {
+        if (!(Number(note.total_paid) > 0 && note.status === "PENDENTE")) return false;
+      }
     }
 
-    if (statusFilter === "avencer") {
-      if (!(note.status === "PENDENTE" && dueDate && dueDate >= today)) return false;
+    // 📅 FILTRO DATA DA VENDA (issue_date)
+    if (dateFilter) {
+      const issueDateStr = note.issue_date.split('T')[0];
+      const selectedDateStr = dateFilter;
+
+      if (issueDateStr !== selectedDateStr) return false;
     }
 
-    if (statusFilter === "parcial") {
-      if (!(Number(note.total_paid) > 0 && note.status === "PENDENTE")) return false;
-    }
-  }
-
-  // 📅 FILTRO DATA DA VENDA (issue_date)
-  if (dateFilter) {
-    const issueDate = new Date(note.issue_date);
-    const selectedDate = new Date(dateFilter);
-
-    issueDate.setHours(0, 0, 0, 0);
-    selectedDate.setHours(0, 0, 0, 0);
-
-    if (issueDate.getTime() !== selectedDate.getTime()) return false;
-  }
-
-  return true;
-});
+    return true;
+  });
 
 const currentNotes = filteredNotes.slice(indexOfFirst, indexOfLast);
 
@@ -323,7 +320,7 @@ const handleOpenInvoicePDF = (invoiceId) => {
                       <span className="text-[10px] text-slate-500 font-bold uppercase tracking-tight mt-0.5">{note.cnpj_cpf}</span>
                     </div>
                   </td>
-                  <td className="px-6 py-5 text-sm font-bold text-slate-300">R$ {Number(note.total_amount || 0).toLocaleString("pt-BR", {
+                  <td className="px-6 py-5 text-sm font-bold text-slate-300">{Number(note.total_amount || 0).toLocaleString("pt-BR", {
   style: "currency",
   currency: "BRL",
 })}</td>
