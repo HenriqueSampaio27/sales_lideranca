@@ -21,6 +21,7 @@ const POSTerminal: React.FC = () => {
   const [tempQty, setTempQty] = useState("");
   const [currentTime, setCurrentTime] = useState("");
   const [cart, setCart] = useState([]);
+  const [cartCupom, setCartCupom] = useState([]);
   const [isPaymentModalOpen, setIsPaymentModalOpen] = useState(false);
   const [discount, setDiscount] = useState(0);
   const [isDiscountModalOpen, setIsDiscountModalOpen] = useState(false);
@@ -217,72 +218,255 @@ const POSTerminal: React.FC = () => {
     finalySave(true, paymentData, null); // 👈 envia para salvar no backend
   };
 
-const finalySave = async (
-  isPaid: boolean,
-  paymentData: any | null,
-  pendingInfo: { advanceAmount: number, dueDate: string } | null
-) => {
+  const finalySave = async (
+    isPaid: boolean,
+    paymentData: any | null,
+    pendingInfo: { advanceAmount: number, dueDate: string } | null
+  ) => {
 
-  if (cart.length === 0) return;
+    if (cart.length === 0) return;
 
-  setIsSaving(true); // 🔄 começa loading
+    setIsSaving(true); // 🔄 começa loading
 
-  const statusValue = isPaid ? "PAGO" : "PENDENTE";
+    const statusValue = isPaid ? "PAGO" : "PENDENTE";
 
-  const items = cart.map((item) => ({
-    product_id: item.id,
-    quantity: item.qty,
-    unit_price_original: item.unit,
-    discount_value: getItemDiscountValue(item),
-    unit_price_final: item.unit - getItemDiscountValue(item),
-  }));
+    const items = cart.map((item) => ({
+      product_id: item.id,
+      quantity: item.qty,
+      unit_price_original: item.unit,
+      discount_value: getItemDiscountValue(item),
+      unit_price_final: item.unit - getItemDiscountValue(item),
+    }));
 
-  try {
-    const response = await fetch(`${base}/invoices`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        customer_id: selectedClient?.id || null,
-        user_id: null,
-        items,
-        status: statusValue,
-        is_paid: isPaid,
-        payment_method: paymentData, // 🔹 pagamentos normais
-        pending_info: isPaid ? null : pendingInfo // 🔹 conta pendente
-      }),
-    });
+    try {
+      const response = await fetch(`${base}/invoices`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          customer_id: selectedClient?.id || null,
+          user_id: null,
+          items,
+          status: statusValue,
+          is_paid: isPaid,
+          payment_method: paymentData, // 🔹 pagamentos normais
+          pending_info: isPaid ? null : pendingInfo // 🔹 conta pendente
+        }),
+      });
 
-    const data = await response.json();
+      const data = await response.json();
 
-    if (!response.ok) {
-      console.error("Erro do backend:", data);
+      if (!response.ok) {
+        console.error("Erro do backend:", data);
 
-      // 👇 mostra erro real
-      alert(data.message || data.error || "Erro ao salvar venda");
+        // 👇 mostra erro real
+        alert(data.message || data.error || "Erro ao salvar venda");
+        setIsSaving(false);
+        return;
+      }
+      setCartCupom(cart)
+      setCart([]);
+      setPayments([]);
+      setDiscount(0);
+      setSelectedClient(null);
+
+      const invoice = data.invoice_id;
+        setSaleCompleted(true);
+        setIsSaving(false);
+        console.log("RESPOSTA BACKEND:", data);
+        console.log("RESPOSTA BACKEND:", data.invoice_id);
+        setInvoiceID(invoice)
+
+    } catch (error) {
+      console.error(error);
+      alert("Erro na conexão com servidor");
       setIsSaving(false);
+    }
+  };
+
+  function gerarCupomTermicoHTML(data, items) {
+
+    const totalItems = items.rows.reduce((acc, item) => acc + Number(item.quantity), 0);
+
+    const total = items.rows.reduce((acc, item) => {
+      return acc + (Number(item.unit_price) * Number(item.quantity));
+    }, 0);
+
+    const discount = items.rows.reduce((acc, item) => {
+      return acc + Number(item.discount_value);
+    }, 0);
+
+    return `
+  <!DOCTYPE html>
+  <html lang="pt-BR">
+  <head>
+  <meta charset="UTF-8">
+  <title>Cupom ${data.id}</title>
+
+  <style>
+    body {
+      font-family: monospace;
+      width: 58mm;
+      margin: 0;
+      padding: 5px;
+    }
+
+    .center { text-align: center; }
+    .bold { font-weight: bold; }
+    .small { font-size: 10px; }
+
+    .line {
+      border-top: 1px dashed #000;
+      margin: 5px 0;
+    }
+
+    .row {
+      display: flex;
+      justify-content: space-between;
+      font-size: 12px;
+    }
+
+    .item {
+      margin-bottom: 4px;
+    }
+
+    @media print {
+      body {
+        width: 58mm;
+      }
+
+      @page {
+        margin: 0;
+      }
+    }
+  </style>
+  </head>
+
+  <body>
+
+  <div class="center bold">
+    LIDERANÇA CONSTRUÇÕES
+  </div>
+
+  <div class="center small">
+    ${data.companyName || ""}
+  </div>
+
+  <div class="center small">
+    CNPJ: ${data.cnpj || "---"}
+  </div>
+
+  <div class="center small">
+    ${data.address || ""}
+  </div>
+
+  <div class="center small">
+    ${data.cityStateZip || ""}
+  </div>
+
+  <div class="line"></div>
+
+  <div class="center bold small">
+    CUPOM NÃO FISCAL
+  </div>
+
+  <div class="line"></div>
+
+  ${items.rows.map(item => `
+    <div class="item">
+      <div class="bold small">${item.product_name}</div>
+      <div class="row small">
+        <span>${item.quantity} x ${Number(item.unit_price).toFixed(2)}</span>
+        <span>${(item.quantity * item.unit_price).toFixed(2)}</span>
+      </div>
+    </div>
+  `).join("")}
+
+  <div class="line"></div>
+
+  <div class="row small">
+    <span>Itens:</span>
+    <span>${totalItems}</span>
+  </div>
+
+  <div class="row small">
+    <span>Subtotal:</span>
+    <span>${total.toFixed(2)}</span>
+  </div>
+
+  <div class="row small">
+    <span>Desconto:</span>
+    <span>${discount.toFixed(2)}</span>
+  </div>
+
+  <div class="row bold">
+    <span>TOTAL:</span>
+    <span>${(total - discount).toFixed(2)}</span>
+  </div>
+
+  <div class="line"></div>
+
+  <div class="center small">
+    ${new Date(data.issue_date).toLocaleString()}
+  </div>
+
+  <div class="center small">
+    Obrigado pela preferência!
+  </div>
+
+  <br><br>
+
+  </body>
+  </html>
+  `;
+  }
+
+  const handlePrint = () => {
+    if (cartCupom.length === 0) {
+      alert("Carrinho vazio");
       return;
     }
 
-    setCart([]);
-    setPayments([]);
-    setDiscount(0);
-    setSelectedClient(null);
+    // 🔹 Dados do cabeçalho (empresa / venda)
+    const data = {
+      id: invoiceID || "SEM_ID",
+      issue_date: new Date(),
+      companyName: "LIDERANÇA CONSTRUÇÕES",
+      address: "Rua Fernando Sarney, 171",
+      cityStateZip: "Santa Inês - MA"
+    };
 
-    const invoice = data.invoice_id;
-      setSaleCompleted(true);
-      setIsSaving(false);
-      console.log("RESPOSTA BACKEND:", data);
-      console.log("RESPOSTA BACKEND:", data.invoice_id);
-      setInvoiceID(invoice)
+    // 🔹 Itens no formato esperado
+    const items = {
+      rows: cartCupom.map(item => ({
+        product_name: item.name,
+        quantity: item.qty,
+        unit_price: item.unit,
+        discount_value: getItemDiscountValue(item)
+      }))
+    };
 
-  } catch (error) {
-    console.error(error);
-    alert("Erro na conexão com servidor");
-    setIsSaving(false);
-  }
-};
+    // 🔹 Gera HTML
+    const html = gerarCupomTermicoHTML(data, items);
 
-  
+    // 🔹 Abre janela e imprime
+    const win = window.open("", "_blank");
+
+    if (!win) {
+      alert("Bloqueador de pop-up ativo!");
+      return;
+    }
+
+    win.document.write(html);
+    win.document.close();
+
+    // Espera renderizar antes de imprimir (IMPORTANTE)
+    win.onload = () => {
+      win.focus();
+      win.print();
+      win.close();
+    };
+    setCartCupom([])
+  };
 
   const pdf = () => {
     console.log(invoiceID)
@@ -642,7 +826,7 @@ const finalySave = async (
       {isProductModalOpen && (
         <div className="fixed inset-0 z-[300] bg-black/80 backdrop-blur-md flex items-center justify-center p-6 animate-in fade-in duration-300">
 
-          <div className="w-full max-w-5xl bg-gradient-to-br from-surface-dark to-background-dark border border-border-dark rounded-[2.5rem] shadow-2xl p-10 relative animate-in zoom-in-95 duration-300">
+          <div className="w-[900px] h-[750px] flex flex-col bg-gradient-to-br from-surface-dark to-background-dark border border-border-dark rounded-[2.5rem] shadow-2xl p-10 relative animate-in zoom-in-95 duration-300">
 
             {/* Fechar */}
             <button
@@ -690,7 +874,7 @@ const finalySave = async (
             </div>
 
             {/* Lista */}
-            <div className="max-h-[400px] overflow-y-auto custom-scrollbar pr-2">
+            <div className="flex-1 overflow-y-auto custom-scrollbar pr-2">
 
               {filteredProducts.length === 0 ? (
                 <div className="text-center py-20 text-slate-600 opacity-40">
@@ -915,6 +1099,7 @@ const finalySave = async (
         onClose={() => {setIsPaymentOpen(false)}}
         onCancel={() => {}}
         onDestroy={() => pdf()}
+        onPrint={() => handlePrint()}
         isSaving={isSaving}
         saleCompleted={saleCompleted}
         onConfirmPayment={handlePaymentConfirm}

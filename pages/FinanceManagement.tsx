@@ -377,14 +377,20 @@ const handleOpenInvoicePDF = (invoiceId) => {
                   </td>
                   <td className="px-6 py-5">
                     <div className="flex items-center justify-center gap-2">
-                      <button 
-                      onClick={() => {
-                          setSelectedNote(note);
-                          setIsPaymentModalOpen(true);
-                        }}
-                      className="p-2 bg-primary rounded-lg text-background-dark hover:scale-110 active:scale-95 transition-all shadow-lg shadow-primary/10" title="Registrar Pagamento">
-                        <span className="material-symbols-outlined text-sm font-black">payments</span>
-                      </button>
+                      {note.status !== "PAGO" && (
+                        <button 
+                          onClick={() => {
+                            setSelectedNote(note);
+                            setIsPaymentModalOpen(true);
+                          }}
+                          className="p-2 bg-primary rounded-lg text-background-dark hover:scale-110 active:scale-95 transition-all shadow-lg shadow-primary/10"
+                          title="Registrar Pagamento"
+                        >
+                          <span className="material-symbols-outlined text-sm font-black">
+                            payments
+                          </span>
+                        </button>
+                      )}
     
                         <button 
                         onClick={() => handleOpenInvoicePDF(note.id)}

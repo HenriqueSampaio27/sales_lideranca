@@ -14,8 +14,10 @@ const StockManagement: React.FC = () => {
   
   useEffect(() => {
     fetchProducts();
-    const result = checkStockStatus(products);
-    
+  }, []);
+
+  useEffect(() => {
+    checkStockStatus(products);
   }, [products]);
 
   const toggleActive = async (prod: any) => {
@@ -147,35 +149,35 @@ const StockManagement: React.FC = () => {
 
       {/* 🔎 BUSCA */}
       <div className="p-8 space-y-8 animate-in fade-in slide-in-from-bottom-6 duration-700">
-       <div className="flex flex-col md:flex-row justify-between items-end gap-6 border-b border-border-dark pb-8">
-         <div>
-           <h2 className="text-4xl font-black text-white tracking-tighter uppercase italic">Gestão de <span className="text-primary">Estoque</span></h2>
-           <p className="text-slate-500 mt-1 font-medium uppercase tracking-[0.1em] text-xs">Controle logístico, reposição e movimentação de mercadorias.</p>
-         </div>
-         <div className="flex gap-4">
+      <div className="flex flex-col md:flex-row justify-between items-end gap-6 border-b border-border-dark pb-8">
+        <div>
+          <h2 className="text-4xl font-black text-white tracking-tighter uppercase italic">Gestão de <span className="text-primary">Estoque</span></h2>
+          <p className="text-slate-500 mt-1 font-medium uppercase tracking-[0.1em] text-xs">Controle logístico, reposição e movimentação de mercadorias.</p>
+        </div>
+        <div className="flex gap-4">
             <button onClick={() => generateStockReport(products)} className="flex items-center gap-2 bg-primary text-background-dark px-8 py-3 rounded-xl text-xs font-black uppercase tracking-widest hover:brightness-110 transition-all shadow-xl shadow-primary/10">
               <span className="material-symbols-outlined text-lg">sync_alt</span>
               Emitir nota
             </button>
-         </div>
-       </div>
+        </div>
+      </div>
 
-       <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
         {[
-           { l: 'Itens em Falta', v: outOfStockSize, c: 'rose', i: 'production_quantity_limits' },
-           { l: 'Reposição Necessária', v: belowMinimumSize, c: 'amber', i: 'order_approve' },
-           { l: 'Giro de Estoque', v: '15.4x', c: 'emerald', i: 'autorenew' },
-           { l: 'Perda/Quebra (Mês)', v: '0.4%', c: 'slate', i: 'dangerous' },
-         ].map((stat, i) => (
-           <div key={i} className="bg-surface-dark p-6 rounded-2xl border border-border-dark hover:border-primary/20 transition-all group">
-             <div className={`size-12 rounded-xl bg-${stat.c}-500/10 text-${stat.c}-500 flex items-center justify-center mb-4 group-hover:scale-110 transition-transform`}>
-               <span className="material-symbols-outlined">{stat.i}</span>
-             </div>
-             <p className="text-[10px] text-slate-500 font-black uppercase tracking-widest mb-1">{stat.l}</p>
-             <p className="text-3xl font-black text-white">{stat.v}</p>
-           </div>
-         ))}
-       </div>
+          { l: 'Itens em Falta', v: outOfStockSize, c: 'rose', i: 'production_quantity_limits' },
+          { l: 'Reposição Necessária', v: belowMinimumSize, c: 'amber', i: 'order_approve' },
+          { l: 'Giro de Estoque', v: '15.4x', c: 'emerald', i: 'autorenew' },
+          { l: 'Perda/Quebra (Mês)', v: '0.4%', c: 'slate', i: 'dangerous' },
+        ].map((stat, i) => (
+          <div key={i} className="bg-surface-dark p-6 rounded-2xl border border-border-dark hover:border-primary/20 transition-all group">
+            <div className={`size-12 rounded-xl bg-${stat.c}-500/10 text-${stat.c}-500 flex items-center justify-center mb-4 group-hover:scale-110 transition-transform`}>
+              <span className="material-symbols-outlined">{stat.i}</span>
+            </div>
+            <p className="text-[10px] text-slate-500 font-black uppercase tracking-widest mb-1">{stat.l}</p>
+            <p className="text-3xl font-black text-white">{stat.v}</p>
+          </div>
+        ))}
+      </div>
       <input
           value={search}
           onChange={(e) => {

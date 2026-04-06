@@ -71,16 +71,20 @@ const Dashboard: React.FC = () => {
       //const subTotal =  cart.reduce((acc, item) => acc + (item.qty * item.unit), 0);
       const value = formatCurrencyCompact(data.reduce((acc, item) => acc + (Number(item.stock) * Number(item.price_cost)), 0))
       let stock = 0
-      let minStock = 0
-      
-      data.map((item) => {
-        if(Number(item.stock) <= Number(item.minStock)){
-          minStock += 1
-        }
-        if(Number(item.stock) == 0){
-          stock += 1
-        }
-      })
+let minStock = 0
+
+      data
+        .filter((item) => item.active === true) // 🔥 igual ao outro código
+        .forEach((item) => {
+          const stockValue = Number(item.stock)
+          const minValue = Number(item.minStock)
+
+          if (stockValue === 0) {
+            stock += 1
+          } else if (stockValue > 0 && stockValue <= minValue) {
+            minStock += 1
+          }
+        })
       setValueStock(value)
       setQntEmpty(stock)
       setQntLow(minStock)

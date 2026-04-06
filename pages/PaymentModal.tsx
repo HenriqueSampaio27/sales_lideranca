@@ -21,6 +21,7 @@ interface PaymentModalProps {
   onDestroy: () => void;
   onConfirmPayment: (paymentData: any) => void;
   onSendWhats: () => void;
+  onPrint: () => void;
   onSendEmail: () => void;
   isSaving: boolean;
   saleCompleted: boolean;
@@ -45,6 +46,7 @@ export function PaymentModal({
   onSendWhats, 
   onSendEmail,
   onResetSale,
+  onPrint,
   isSaving,
   saleCompleted
 }: PaymentModalProps) {
@@ -191,6 +193,11 @@ export function PaymentModal({
             </div>
 
             <div className="space-y-4">
+                <button onClick={() => onPrint()} className="w-full h-14 bg-[#fc0000] text-[#222115] font-bold text-lg rounded-xl flex items-center justify-center gap-3 hover:brightness-110 transition-all shadow-lg shadow-[#fcc000]/10">
+                <Printer className="w-6 h-6" />
+                Imprimir Cupom Térmico
+                </button>
+                
                 <button onClick={() => onDestroy()} className="w-full h-14 bg-[#fcc000] text-[#222115] font-bold text-lg rounded-xl flex items-center justify-center gap-3 hover:brightness-110 transition-all shadow-lg shadow-[#fcc000]/10">
                 <Printer className="w-6 h-6" />
                 Imprimir Cupom
