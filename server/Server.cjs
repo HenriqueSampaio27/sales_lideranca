@@ -19,12 +19,29 @@ app.listen(PORT, '0.0.0.0', async () => {
 });
 
 app.use(cors({
-  origin: ['http://localhost:3000',
-  'http://192.168.3.120:3000',
-  "https://henriquesampaio27.github.io"],
+  origin: function (origin, callback) {
+    if (!origin) return callback(null, true);
+
+    if (
+      origin.startsWith('http://192.168.3.') ||
+      origin === 'http://localhost:3000' ||
+      origin === 'https://henriquesampaio27.github.io'
+    ) {
+      callback(null, true);
+    } else {
+      callback(new Error('Not allowed by CORS'));
+    }
+  },
   methods: ['GET', 'POST', 'PUT', "PATCH", 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization']
 }));
+// app.use(cors({
+//   origin: ['http://localhost:3000',
+//   'http://192.168.3.142:3000',
+//   "https://henriquesampaio27.github.io"],
+//   methods: ['GET', 'POST', 'PUT', "PATCH", 'DELETE', 'OPTIONS'],
+//   allowedHeaders: ['Content-Type', 'Authorization']
+// }));
 app.use(express.json());
 
 const pool = new Pool({

@@ -28,6 +28,7 @@ const POSTerminal: React.FC = () => {
   const [discountInput, setDiscountInput] = useState(""); 
   const [isSaving, setIsSaving] = useState(false);
   const [saleCompleted, setSaleCompleted] = useState(false);
+  const [isQuoteMode, setIsQuoteMode] = useState(false);
   const [payments, setPayments] = useState<
     { method: string; amount: number }[]
   >([]);
@@ -215,6 +216,12 @@ const POSTerminal: React.FC = () => {
   const handlePaymentConfirm = (paymentData: any) => {
     console.log("Pagamento recebido do modal:", paymentData);
 
+    if (isQuoteMode) {
+      // 🔥 modo orçamento → NÃO salva
+      setCartCupom(cart);
+      setSaleCompleted(true);
+      return;
+    }
     finalySave(true, paymentData, null); // 👈 envia para salvar no backend
   };
 
@@ -587,9 +594,15 @@ const POSTerminal: React.FC = () => {
   }, []);
 
   return (
-    <div className="fixed inset-0 z-[100] bg-background-dark flex flex-col overflow-hidden animate-in fade-in duration-300">
+    <div className={`fixed inset-0 z-[100] flex flex-col overflow-hidden animate-in fade-in duration-300 ${
+        isQuoteMode
+          ? "bg-[rgba(255,200,0,0.15)]"
+            : "bg-background-dark"
+      }`}>
       {/* POS Header */}
+      
       <header className="flex items-center justify-between px-6 py-3 bg-surface-dark border-b border-border-dark">
+        
         <div className="flex items-center gap-8">
           <div className="flex items-center gap-3">
             <div className="bg-primary p-2 rounded text-background-dark shadow-lg shadow-primary/20">
@@ -609,6 +622,25 @@ const POSTerminal: React.FC = () => {
             </div> */}
           </div>
         </div>
+        <div className="flex items-center gap-3 bg-black/40 px-4 py-2 rounded-xl border border-border-dark">
+          <span className="text-xs font-bold uppercase text-slate-400">Orçamento</span>
+
+          <button
+            onClick={() => setIsQuoteMode(prev => {
+              console.log("Modo orçamento:", !prev);
+              return !prev;
+            })}
+            className={`w-14 h-7 flex items-center rounded-full transition-all ${
+              isQuoteMode ? "bg-red-600" : "bg-slate-600"
+            }`}
+          >
+            <div
+              className={`w-6 h-6 bg-white rounded-full shadow-md transform transition-all ${
+                isQuoteMode ? "translate-x-7" : "translate-x-1"
+              }`}
+            />
+          </button>
+        </div>
         <div className="flex items-center gap-4">
           <div className="flex items-center gap-2 bg-black/40 px-4 py-2 rounded-xl border border-border-dark">
             <span className="material-symbols-outlined text-primary text-xl">schedule</span>
@@ -623,7 +655,9 @@ const POSTerminal: React.FC = () => {
         </div>
       </header>
 
-      <main className="flex flex-1 overflow-hidden">
+      <main className={`flex flex-1 overflow-hidden ${
+              isQuoteMode ? "bg-yellow-800/20" : ""
+            }`}>
 
         {/* Center item list */}
         <section className="flex-1 flex flex-col bg-background-dark relative">
@@ -809,7 +843,11 @@ const POSTerminal: React.FC = () => {
               FINALIZAR VENDA
             </button>
             <button 
-            onClick={() => {{/*finalySave(false, null),*/} setIsPendingModalOpen(true)}}
+            onClick={() => {{/*finalySave(false, null),*/}if (isQuoteMode) {
+                setCartCupom(cart);
+                setSaleCompleted(true);
+                return;
+              } setIsPendingModalOpen(true)}}
             className="bg-surface-dark border border-border-dark text-white py-5 rounded-2xl font-black uppercase tracking-widest text-xs hover:bg-white/5 transition-all flex items-center justify-center gap-3">
               <span className="material-symbols-outlined text-lg">receipt_long</span>
               CONTA PENDENTE
@@ -1108,6 +1146,10 @@ const POSTerminal: React.FC = () => {
         onResetSale={() => {
           setSaleCompleted(false);
           setIsPaymentOpen(false);
+          setCart([]);
+          setPayments([]);
+          setDiscount(0);
+          setSelectedClient(null);
         }}
       />
     )}
