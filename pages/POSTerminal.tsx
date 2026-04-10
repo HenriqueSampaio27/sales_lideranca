@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { useNavigate } from "react-router-dom";
 import { PaymentModal } from './PaymentModal';
 import { PendingAccountModal } from './PendentModal';
@@ -29,6 +29,8 @@ const POSTerminal: React.FC = () => {
   const [isSaving, setIsSaving] = useState(false);
   const [saleCompleted, setSaleCompleted] = useState(false);
   const [isQuoteMode, setIsQuoteMode] = useState(false);
+  const inputRef = useRef<HTMLInputElement>(null);
+  const modalInputRef = useRef<HTMLInputElement>(null);
   const [payments, setPayments] = useState<
     { method: string; amount: number }[]
   >([]);
@@ -526,8 +528,10 @@ const POSTerminal: React.FC = () => {
     window.open(url, "_blank");
   };
   
+  
     // 
   useEffect(() => {
+    inputRef.current?.focus();   
     const updateTime = () => {
       const now = new Date();
 
@@ -592,6 +596,33 @@ const POSTerminal: React.FC = () => {
       clearInterval(interval)
     };
   }, []);
+
+  useEffect(() => {
+    const anyModalOpen =
+      isProductModalOpen ||
+      isClientModalOpen ||
+      isPaymentModalOpen ||
+      isPendingModalOpen;
+
+    if (!anyModalOpen) {
+      setTimeout(() => {
+        inputRef.current?.focus();
+      }, 0);
+    }
+  }, [
+    isProductModalOpen,
+    isClientModalOpen,
+    isPaymentModalOpen,
+    isPendingModalOpen
+  ]);
+
+  useEffect(() => {
+    if (isProductModalOpen) {
+      setTimeout(() => {
+        modalInputRef.current?.focus();
+      }, 0);
+    }
+  }, [isProductModalOpen]);
 
   return (
     <div className={`fixed inset-0 z-[100] flex flex-col overflow-hidden animate-in fade-in duration-300 ${
@@ -665,11 +696,16 @@ const POSTerminal: React.FC = () => {
             <div className="relative flex-1">
               <span className="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-primary">barcode_scanner</span>
               <input value={searchProduct}
+                ref={inputRef}
                 onChange={(e) => setSearchProduct(e.target.value)}
                 onKeyDown={(e) => {
                   if (e.key === "Enter") {
                     searchProductByBarcode(searchProduct);
                     setSearchProduct("");
+
+                    setTimeout(() => {
+                      inputRef.current?.focus();
+                    }, 0);
                   }
                   if (e.key === "F1") {
                     e.preventDefault();
@@ -890,6 +926,7 @@ const POSTerminal: React.FC = () => {
                 search
               </span>
               <input
+                ref={modalInputRef}
                 type="text"
                 placeholder="Buscar por nome ou código..."
                 className="w-full bg-black/40 border border-border-dark rounded-2xl py-4 pl-14 pr-6 text-white font-bold tracking-tight focus:ring-2 focus:ring-primary focus:border-primary outline-none transition-all"
