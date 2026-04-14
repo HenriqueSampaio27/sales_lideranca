@@ -125,6 +125,7 @@ const overduePercentage =
   };
   console.log(notes)
 
+
   const filteredNotes = notes.filter((note) => {
 
   // 🔎 FILTRO TEXTO (cliente ou documento ou número)
@@ -197,6 +198,135 @@ const handleDelete = async (id: number) => {
 const handleOpenInvoicePDF = (invoiceId) => {
   window.open(`${base}/generate-danfe/${invoiceId}`, "_blank");
 };
+
+const handlePrintCupom = async (invoiceId: number) => {
+  try {
+    const response = await fetch(`${base}/financial-notes`);
+    const data = await response.json();
+
+    const invoice = data.find((inv: any) => inv.id === invoiceId);
+
+    if (!invoice) {
+      alert("Nota não encontrada");
+      return;
+    }
+
+    const printWindow = window.open("", "_blank");
+    if (!printWindow) return;
+
+    printWindow.document.write(`
+      <html>
+        <head>
+          <title>Cupom</title>
+          <style>
+            @page {
+              size: 80mm auto;
+              margin: 0;
+            }
+
+            body {
+              font-family: monospace;
+              font-size: 12px;
+              width: 80mm;
+              margin: 0;
+              padding: 5px;
+              color: #000;
+            }
+
+            .center {
+              text-align: center;
+            }
+
+            .line {
+              border-top: 1px dashed #000;
+              margin: 6px 0;
+            }
+
+            .item {
+              display: flex;
+              justify-content: space-between;
+              margin-bottom: 3px;
+              font-size: 11px;
+            }
+
+            .total {
+              font-weight: bold;
+              font-size: 13px;
+              display: flex;
+              justify-content: space-between;
+              margin-top: 8px;
+            }
+
+            .small {
+              font-size: 10px;
+            }
+
+            @media print {
+              body {
+                width: 80mm;
+              }
+            }
+          </style>
+        </head>
+
+        <body onload="window.print(); window.close();">
+
+          <div class="center">
+            <strong>MINHA LOJA</strong><br/>
+            CUPOM NÃO FISCAL
+          </div>
+
+          <div class="line"></div>
+
+          <div class="small">
+            Cliente: ${invoice.customer_name || "-"}<br/>
+            Documento: ${invoice.cnpj_cpf || "-"}<br/>
+            Data: ${new Date(invoice.issue_date).toLocaleString("pt-BR")}<br/>
+            Nº: ${invoice.invoice_number}
+          </div>
+
+          <div class="line"></div>
+
+          ${invoice.items
+            .map(
+              (item: any) => `
+                <div class="item">
+                  <span>${item.product_name} x${item.quantity}</span>
+                  <span>${Number(item.item_total).toLocaleString("pt-BR", {
+                    style: "currency",
+                    currency: "BRL",
+                  })}</span>
+                </div>
+              `
+            )
+            .join("")}
+
+          <div class="line"></div>
+
+          <div class="total">
+            <span>TOTAL</span>
+            <span>${Number(invoice.total_amount).toLocaleString("pt-BR", {
+              style: "currency",
+              currency: "BRL",
+            })}</span>
+          </div>
+
+          <div class="line"></div>
+
+          <div class="center small">
+            Obrigado pela preferência!
+          </div>
+
+        </body>
+      </html>
+    `);
+
+    printWindow.document.close();
+  } catch (error) {
+    console.error("Erro ao imprimir cupom:", error);
+  }
+};
+
 
   useEffect(() => {
     fetchFinancialNotes();
@@ -278,7 +408,7 @@ const handleOpenInvoicePDF = (invoiceId) => {
           </div>
           <div className="w-48 relative">
             <select  value={statusFilter}
-  onChange={(e) => setStatusFilter(e.target.value)} className="w-full bg-accent-dark border border-white/10 rounded-lg pl-3 pr-10 py-2.5 text-sm text-white focus:ring-1 focus:ring-primary appearance-none outline-none">
+                onChange={(e) => setStatusFilter(e.target.value)} className="w-full bg-accent-dark border border-white/10 rounded-lg pl-3 pr-10 py-2.5 text-sm text-white focus:ring-1 focus:ring-primary appearance-none outline-none">
               <option value="">Todos os Status</option>
               <option value="avencer">A Vencer</option>
               <option value="vencido">Vencido</option>
@@ -287,8 +417,8 @@ const handleOpenInvoicePDF = (invoiceId) => {
           </div>
           <div className="w-56 relative">
             <input 
-  value={dateFilter}
-  onChange={(e) => setDateFilter(e.target.value)} className="w-full bg-accent-dark border border-white/10 rounded-lg px-3 py-2.5 text-sm text-white focus:ring-1 focus:ring-primary [color-scheme:dark] outline-none" type="date"/>
+              value={dateFilter}
+              onChange={(e) => setDateFilter(e.target.value)} className="w-full bg-accent-dark border border-white/10 rounded-lg px-3 py-2.5 text-sm text-white focus:ring-1 focus:ring-primary [color-scheme:dark] outline-none" type="date"/>
           </div>
           <button className="bg-accent-dark text-white border border-white/10 p-2.5 rounded-lg hover:bg-white/5 transition-all">
             <span className="material-symbols-outlined">filter_list</span>
@@ -321,59 +451,59 @@ const handleOpenInvoicePDF = (invoiceId) => {
                     </div>
                   </td>
                   <td className="px-6 py-5 text-sm font-bold text-slate-300">{Number(note.total_amount || 0).toLocaleString("pt-BR", {
-  style: "currency",
-  currency: "BRL",
-})}</td>
+                style: "currency",
+                currency: "BRL",
+              })}</td>
                   <td className={`px-6 py-5 text-sm font-black ${note.status === 'PENDENTE' ? 'text-red-500' : note.status === 'PAGO' ? 'text-green-500' : 'text-white'}`}>
                     {note.status === "PENDENTE"
-    ? (Number(note.total_amount ?? 0) - Number(note.total_paid ?? 0))
-        .toLocaleString("pt-BR", {
-          style: "currency",
-          currency: "BRL",
-        })
-    : "R$ 0,00"
-    }
+                      ? (Number(note.total_amount ?? 0) - Number(note.total_paid ?? 0))
+                          .toLocaleString("pt-BR", {
+                            style: "currency",
+                            currency: "BRL",
+                          })
+                      : "R$ 0,00"
+                      }
 
                   </td>
                   <td className="px-6 py-5 text-sm font-bold text-slate-400">{note.due_date 
-    ? new Date(note.due_date).toLocaleDateString("pt-BR")
-    : ""}</td>
+                      ? new Date(note.due_date).toLocaleDateString("pt-BR")
+                      : ""}</td>
                   <td className="px-6 py-5">
                     
                     {(() => {
-  const today = new Date();
-  today.setHours(0, 0, 0, 0);
+                      const today = new Date();
+                      today.setHours(0, 0, 0, 0);
 
-  const dueDate = note.due_date ? new Date(note.due_date) : null;
-  if (dueDate) dueDate.setHours(0, 0, 0, 0);
+                      const dueDate = note.due_date ? new Date(note.due_date) : null;
+                      if (dueDate) dueDate.setHours(0, 0, 0, 0);
 
-  let displayStatus = "";
-  let badgeStyle = "";
-  let dotStyle = "";
+                      let displayStatus = "";
+                      let badgeStyle = "";
+                      let dotStyle = "";
 
-  if (note.status === "PAGO") {
-    displayStatus = "Pago";
-    badgeStyle = "bg-green-500/10 text-green-400 border-green-500/20";
-    dotStyle = "bg-green-400";
-  } else if (note.status === "PENDENTE") {
-    if (dueDate && dueDate < today) {
-      displayStatus = "Vencido";
-      badgeStyle = "bg-red-500/10 text-red-500 border-red-500/20";
-      dotStyle = "bg-red-500 animate-pulse";
-    } else {
-      displayStatus = "A Vencer";
-      badgeStyle = "bg-yellow-500/10 text-yellow-400 border-yellow-500/20";
-      dotStyle = "bg-yellow-400";
-    }
-  }
+                      if (note.status === "PAGO") {
+                        displayStatus = "Pago";
+                        badgeStyle = "bg-green-500/10 text-green-400 border-green-500/20";
+                        dotStyle = "bg-green-400";
+                      } else if (note.status === "PENDENTE") {
+                        if (dueDate && dueDate < today) {
+                          displayStatus = "Vencido";
+                          badgeStyle = "bg-red-500/10 text-red-500 border-red-500/20";
+                          dotStyle = "bg-red-500 animate-pulse";
+                        } else {
+                          displayStatus = "A Vencer";
+                          badgeStyle = "bg-yellow-500/10 text-yellow-400 border-yellow-500/20";
+                          dotStyle = "bg-yellow-400";
+                        }
+                      }
 
-  return (
-    <span className={`inline-flex items-center gap-1.5 py-1 px-3 rounded-full text-[10px] font-black uppercase tracking-widest border ${badgeStyle}`}>
-      <span className={`w-1.5 h-1.5 rounded-full ${dotStyle}`}></span>
-      {displayStatus}
-    </span>
-  );
-})()}
+                      return (
+                        <span className={`inline-flex items-center gap-1.5 py-1 px-3 rounded-full text-[10px] font-black uppercase tracking-widest border ${badgeStyle}`}>
+                          <span className={`w-1.5 h-1.5 rounded-full ${dotStyle}`}></span>
+                          {displayStatus}
+                        </span>
+                      );
+                    })()}
                   </td>
                   <td className="px-6 py-5">
                     <div className="flex items-center justify-center gap-2">
@@ -397,7 +527,17 @@ const handleOpenInvoicePDF = (invoiceId) => {
                         className="p-2 bg-accent-dark text-slate-400 rounded-lg hover:text-white transition-colors" title="Detalhes">
                           <span className="material-symbols-outlined text-sm">visibility</span>
                         </button>
-                    
+
+                        <button
+                          onClick={() => handlePrintCupom(note.id)}
+                          className="p-2 bg-accent-dark text-slate-400 rounded-lg hover:text-primary transition-colors"
+                          title="Cupom térmico"
+                        >
+                          <span className="material-symbols-outlined text-sm">
+                            receipt_long
+                          </span>
+                        </button>
+
                         <button className="p-2 bg-accent-dark text-slate-400 rounded-lg hover:text-primary transition-colors" title="Enviar Lembrete">
                           <span className="material-symbols-outlined text-sm">notifications_active</span>
                         </button>

@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { PaymentModal } from './PaymentModal';
 import { PendingAccountModal } from './PendentModal';
 import { baseUrl } from "../services/AuthService"
+import { handleLogin } from '@/services/Authentication';
 
 const POSTerminal: React.FC = () => {
   
@@ -1195,13 +1196,15 @@ const POSTerminal: React.FC = () => {
         isOpen={isPendingModalOpen}
         onClose={() => setIsPendingModalOpen(false)}
         totalAmount={total}
-        onDestroy= {() => pdf()}
-        onConfirm={(data) => {
-          console.log("Dados recebidos:", data);
-            finalySave(false, null, { advanceAmount: data.advanceAmount, dueDate: data.paymentDate} 
-            )
+        onDestroy= {() => {}}
+        onConfirm={async (data) => {
+            await finalySave(false, null, {
+              advanceAmount: data.advanceAmount,
+              dueDate: data.paymentDate
+            });
 
-        }}
+            handlePrint(); // imprime só depois de salvar
+          }}
         />
       )}
     </div>

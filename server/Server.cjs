@@ -527,9 +527,27 @@ app.get('/financial-notes', async (req, res) => {
       SELECT 
         i.*,
         c.name AS customer_name,
-        c.cnpj_cpf AS cnpj_cpf
+        c.cnpj_cpf AS cnpj_cpf,
+
+        COALESCE(
+          json_agg(
+            json_build_object(
+              'product_id', ii.product_id,
+              'product_name', p.product_name,
+              'quantity', ii.quantity,
+              'unit_price', ii.unit_price,
+              'item_total', ii.item_total
+            )
+          ) FILTER (WHERE ii.id IS NOT NULL),
+          '[]'
+        ) AS items
+
       FROM invoices i
       LEFT JOIN customer c ON c.id = i.customer_id
+      LEFT JOIN invoice_items ii ON ii.invoice_id = i.id
+      LEFT JOIN product p ON p.id = ii.product_id
+
+      GROUP BY i.id, c.id
       ORDER BY i.id DESC
     `);
 
@@ -905,6 +923,113 @@ app.post("/invoices/:id/send-email", async (req, res) => {
     return res.status(500).json({
       error: "Erro ao enviar email",
     });
+  }
+});
+
+app.post('/duplicates', async (req, res) => {
+  console.log("🔥 CHEGOU NA ROTA DUPLICATES");
+  console.log(req.body);
+  try {
+    const { client, cnpj, document, dueDate, value, status } = req.body;
+
+    // validação básica
+    if (!client || !document || !dueDate || !value) {
+      return res.status(400).json({
+        message: "Campos obrigatórios não informados"
+      });
+    }
+
+    const result = await pool.query(
+      `INSERT INTO duplicates 
+      (client, cnpj, document, due_date, value, status)
+      VALUES ($1, $2, $3, $4, $5, $6)
+      RETURNING *`,
+      [
+        client,
+        cnpj || null,
+        document,
+        dueDate,
+        value,
+        status || 'pending'
+      ]
+    );
+
+    res.status(201).json(result.rows[0]);
+
+  } catch (error) {
+    console.error("Erro ao salvar duplicata:", error);
+
+    // erro de campo obrigatório
+    if (error.code === "23502") {
+      return res.status(400).json({
+        message: `Campo obrigatório não informado: ${error.column}`
+      });
+    }
+
+    res.status(500).json({
+      message: "Erro ao salvar duplicata"
+    });
+  }
+});
+
+app.get('/duplicates', async (req, res) => {
+  try {
+    const result = await pool.query(
+      "SELECT * FROM duplicates ORDER BY created_at DESC"
+    );
+
+    res.json(result.rows);
+
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({
+      message: "Erro ao buscar duplicatas"
+    });
+  }
+});
+
+app.patch('/duplicates/:id/pay', async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const result = await pool.query(
+      `UPDATE duplicates
+      SET status = 'paid'
+      WHERE id = $1
+       RETURNING *`,
+      [id]
+    );
+
+    if (result.rowCount === 0) {
+      return res.status(404).json({ message: 'Duplicata não encontrada' });
+    }
+
+    res.json(result.rows[0]);
+
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: 'Erro ao confirmar pagamento' });
+  }
+});
+
+app.delete('/duplicates/:id', async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const result = await pool.query(
+      `DELETE FROM duplicates WHERE id = $1 RETURNING *`,
+      [id]
+    );
+
+    if (result.rowCount === 0) {
+      return res.status(404).json({ message: 'Duplicata não encontrada' });
+    }
+
+    res.json({ message: 'Duplicata deletada com sucesso' });
+
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: 'Erro ao deletar duplicata' });
   }
 });
 

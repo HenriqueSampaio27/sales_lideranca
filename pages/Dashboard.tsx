@@ -13,6 +13,7 @@ import {
   Search,
   Filter,
   Download,
+  Receipt,
   Calendar,
   MoreVertical,
   ArrowRight,
@@ -20,10 +21,24 @@ import {
   TrendingDown,
   AlertTriangle,
   XCircle,
-  CheckCircle2
+  CheckCircle2,
+  FileText
 } from 'lucide-react';
 import { Form } from 'react-router-dom';
 import { baseUrl } from "../services/AuthService"
+
+
+type DuplicateType = {
+  id: string;
+  client: string;
+  cnpj: string;
+  document: string;
+  due_date: string;
+  value: number;
+  status: 'pending' | 'delayed' | 'paid';
+  initials: string;
+};
+
 
 const Dashboard: React.FC = () => {
   const [timeFilter, setTimeFilter] = useState<keyof typeof CHART_DATA>('30d');
@@ -35,7 +50,11 @@ const Dashboard: React.FC = () => {
   const [totalPaid, setTotalPaid] = useState("")
   const [totalPedding, setTotalPedding] = useState("")
   const [estimated, setEstimated] = useState("")
+  const [valueDuplicate, setValueDuplicate] = useState("")
+  const [data, setData] = useState<DuplicateType[]>([]);
   const base = baseUrl
+
+
   const formatCurrencyCompact = (value: number): string  => {
   const abs = Math.abs(value)
 
@@ -71,7 +90,7 @@ const Dashboard: React.FC = () => {
       //const subTotal =  cart.reduce((acc, item) => acc + (item.qty * item.unit), 0);
       const value = formatCurrencyCompact(data.reduce((acc, item) => acc + (Number(item.stock) * Number(item.price_cost)), 0))
       let stock = 0
-let minStock = 0
+      let minStock = 0
 
       data
         .filter((item) => item.active === true) // 🔥 igual ao outro código
@@ -155,13 +174,23 @@ let minStock = 0
     console.error(error);
     setChartData([]);
   }
-};
-  
-  
+};  
+
+  const totalDuplicatesValue = data
+    .filter((item: any) =>
+      item.status === "pending" || item.status === "delayed"
+    )
+    .reduce((acc: number, item: any) => {
+      const value = Number(item.value);
+      return acc + (isNaN(value) ? 0 : value);
+    }, 0);
+  const valueDuplicatex = formatCurrencyCompact(totalDuplicatesValue);
+
   const kpis = [
     { label: 'Baixo Estoque', value: qntLow, change: 'Atenção', color: 'amber', icon: <AlertTriangle className="size-5" /> },
     { label: 'Esgotados', value: qntEmpty, change: 'Crítico', color: 'rose', icon: <XCircle className="size-5" /> },
     { label: 'Valor em Estoque', value: valueStock, change: '', color: 'emerald', icon: <Package className="size-5" /> },
+    { label: 'Valor Duplicatas', value: valueDuplicatex, change: '', color: 'emerald', icon: <FileText className="size-5" /> },
     { label: 'Total Faturado', value: totalPaid, change: '', color: 'primary', icon: <DollarSign className="size-5" /> },
     { label: 'Total Pendência', value: totalPedding, change: '', color: 'primary', icon: <BarChart3 className="size-5" /> },
     { label: 'Total de Vendas', value: totalBilled, change: '', color: 'primary', icon: <ShoppingCart className="size-5" /> },
@@ -187,6 +216,16 @@ let minStock = 0
     fetchChartData(timeFilter);
   }, [timeFilter])
 
+  useEffect(() => {
+    async function load() {
+      const res = await fetch(`${base}/duplicates`);
+      const json = await res.json();
+      setData(json);
+    }
+
+    load();
+  }, []);
+
 
   return (
     <div className="flex min-h-screen bg-background-dark text-slate-200">
@@ -195,8 +234,8 @@ let minStock = 0
 
         <div className="p-8 space-y-8">
           {/* KPI Grid - Row 1 (Stock Indicators - 3 items) */}
-          <section className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            {kpis.slice(0, 3).map((kpi, idx) => {
+          <section className="grid grid-cols-1 md:grid-cols-4 gap-4">
+            {kpis.slice(0, 4).map((kpi, idx) => {
               const colors = getColorClasses(kpi.color || 'primary');
               return (
                 <motion.div 
@@ -221,7 +260,7 @@ let minStock = 0
 
           {/* KPI Grid - Row 2 (Financial Indicators - 4 items) */}
           <section className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-            {kpis.slice(3).map((kpi, idx) => {
+            {kpis.slice(4).map((kpi, idx) => {
               const colors = getColorClasses(kpi.color || 'primary');
               return (
                 <motion.div 

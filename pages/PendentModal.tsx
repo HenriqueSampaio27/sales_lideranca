@@ -230,7 +230,7 @@ export function PendingAccountModal({ isOpen, onClose, totalAmount, onConfirm, o
                 Cancelar
               </button>
               <button 
-                onClick={() => {handleConfirm(), onDestroy()}}
+                onClick={() => {handleConfirm()}}
                 className="flex items-center gap-2 px-8 py-3 text-sm font-bold bg-primary text-background-dark rounded-xl hover:brightness-110 active:scale-95 transition-all shadow-lg shadow-primary/10"
               >
                 <span>Confirmar Pendência</span>
