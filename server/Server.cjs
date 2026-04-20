@@ -775,9 +775,9 @@ app.get("/generate-danfe/:id", async (req, res) => {
 
     const items = await pool.query(
       `SELECT ii.*, p.product_name
-       FROM invoice_items ii
-       JOIN product p ON p.id = ii.product_id
-       WHERE ii.invoice_id = $1`,
+      FROM invoice_items ii
+      JOIN product p ON p.id = ii.product_id
+      WHERE ii.invoice_id = $1`,
       [invoiceId]
     );
 
@@ -785,7 +785,7 @@ app.get("/generate-danfe/:id", async (req, res) => {
     console.log(data)
     console.log(items)
   const html = gerarDanfeHTML(data, items);
- 
+
     const browser = await puppeteer.launch({
       executablePath: process.env.PUPPETEER_EXECUTABLE_PATH,
       args: [
@@ -803,7 +803,7 @@ app.get("/generate-danfe/:id", async (req, res) => {
     const pdf = await page.pdf({
       format: "A4",
       printBackground: true,
-       displayHeaderFooter: true,
+      displayHeaderFooter: true,
 
   headerTemplate: `<div></div>`,
 

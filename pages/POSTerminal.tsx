@@ -30,6 +30,7 @@ const POSTerminal: React.FC = () => {
   const [isSaving, setIsSaving] = useState(false);
   const [saleCompleted, setSaleCompleted] = useState(false);
   const [isQuoteMode, setIsQuoteMode] = useState(false);
+  const [clientId, setClientId] = useState<any[]>([])
   const inputRef = useRef<HTMLInputElement>(null);
   const modalInputRef = useRef<HTMLInputElement>(null);
   const [payments, setPayments] = useState<
@@ -293,8 +294,8 @@ const POSTerminal: React.FC = () => {
     }
   };
 
-  function gerarCupomTermicoHTML(data, items) {
-
+  function gerarCupomTermicoHTML(data, client, items) {
+    console.log(client)
     const totalItems = items.rows.reduce((acc, item) => acc + Number(item.quantity), 0);
 
     const total = items.rows.reduce((acc, item) => {
@@ -302,7 +303,7 @@ const POSTerminal: React.FC = () => {
     }, 0);
 
     const discount = items.rows.reduce((acc, item) => {
-      return acc + Number(item.discount_value);
+      return acc + Number(item.discount_value) * Number(item.quantity);
     }, 0);
 
     return `
@@ -375,6 +376,24 @@ const POSTerminal: React.FC = () => {
 
   <div class="line"></div>
 
+  ${client != null ? `<div class="center small">
+    ${client.name || ""}
+  </div>
+
+  <div class="center small">
+    CNPJ: ${client.cnpj_cpf || "---"}
+  </div>
+
+  <div class="center small">
+    ${client.phone || ""}
+  </div>
+
+  <div class="center small">
+    ${client.logradouro + ", nº " + client.number + ", \n" + client.district || ""}
+  </div>
+
+  <div class="line"></div>` : ""}
+
   <div class="center bold small">
     CUPOM NÃO FISCAL
   </div>
@@ -436,6 +455,8 @@ const POSTerminal: React.FC = () => {
       return;
     }
 
+    const client = clientId.length > 0 ? clientId[0] : null;
+
     // 🔹 Dados do cabeçalho (empresa / venda)
     const data = {
       id: invoiceID || "SEM_ID",
@@ -444,6 +465,8 @@ const POSTerminal: React.FC = () => {
       address: "Rua Fernando Sarney, 171",
       cityStateZip: "Santa Inês - MA"
     };
+
+    
 
     // 🔹 Itens no formato esperado
     const items = {
@@ -456,7 +479,7 @@ const POSTerminal: React.FC = () => {
     };
 
     // 🔹 Gera HTML
-    const html = gerarCupomTermicoHTML(data, items);
+    const html = gerarCupomTermicoHTML(data, client, items);
 
     // 🔹 Abre janela e imprime
     const win = window.open("", "_blank");
@@ -1050,7 +1073,7 @@ const POSTerminal: React.FC = () => {
               className="w-full bg-black/40 border border-border-dark rounded-2xl py-4 pl-14 pr-6 text-white font-bold tracking-tight focus:ring-2 focus:ring-primary focus:border-primary outline-none transition-all"
               onChange={(e) => {
                 const value = e.target.value.toLowerCase();
-
+                
                 if (!value) {
                   setFilteredClients(clients);
                   return;
@@ -1083,6 +1106,7 @@ const POSTerminal: React.FC = () => {
                 <div
                   key={client.id}
                   onClick={() => {
+                    setClientId(client)
                     setSelectedClient(client);
                     setIsClientModalOpen(false);
                   }}

@@ -214,6 +214,9 @@ const handlePrintCupom = async (invoiceId: number) => {
     const printWindow = window.open("", "_blank");
     if (!printWindow) return;
 
+    let value_sub = 0
+    let value_disc = 0
+
     printWindow.document.write(`
       <html>
         <head>
@@ -272,7 +275,7 @@ const handlePrintCupom = async (invoiceId: number) => {
         <body onload="window.print(); window.close();">
 
           <div class="center">
-            <strong>MINHA LOJA</strong><br/>
+            <strong>LIDERANÇA CONSTRUÇÕES</strong><br/>
             CUPOM NÃO FISCAL
           </div>
 
@@ -289,20 +292,47 @@ const handlePrintCupom = async (invoiceId: number) => {
 
           ${invoice.items
             .map(
-              (item: any) => `
-                <div class="item">
-                  <span>${item.product_name} x${item.quantity}</span>
-                  <span>${Number(item.item_total).toLocaleString("pt-BR", {
-                    style: "currency",
-                    currency: "BRL",
-                  })}</span>
+              (item: any) => {
+                value_disc += Number(item.discount_value);
+                value_sub += Number(item.unit_price_original);
+                `
+                <div>
+                  <div class="item">
+                    <span>${item.product_name} x${item.quantity}</span>
+                    <span>${Number(item.unit_price_original).toLocaleString("pt-BR", {
+                      style: "currency",
+                      currency: "BRL",
+                    })}</span>
+                  </div>
+                  ${Number(item.discount_value) != 0 ? 
+                    `<div class="item">
+                      <span>Desconto</span>
+                      <span>${Number(item.discount_value).toLocaleString("pt-BR", {
+                        style: "currency",
+                        currency: "BRL",
+                      })}</span>
+                      </div>` : ""}
                 </div>
-              `
+              `}
             )
             .join("")}
 
           <div class="line"></div>
 
+          <div class="total">
+            <span>SUBTOTAL</span>
+            <span>${Number(value_sub).toLocaleString("pt-BR", {
+              style: "currency",
+              currency: "BRL",
+            })}</span>
+          </div>
+          ${value_disc != 0 ? `<div class="total">
+            <span>DESCONTO</span>
+            <span>${Number(value_disc).toLocaleString("pt-BR", {
+              style: "currency",
+              currency: "BRL",
+            })}</span>
+          </div>` : ""}
           <div class="total">
             <span>TOTAL</span>
             <span>${Number(invoice.total_amount).toLocaleString("pt-BR", {
