@@ -295,7 +295,7 @@ const POSTerminal: React.FC = () => {
   };
 
   function gerarCupomTermicoHTML(data, client, items) {
-    console.log(client)
+    console.log("dentro de html: " + client)
     const totalItems = items.rows.reduce((acc, item) => acc + Number(item.quantity), 0);
 
     const total = items.rows.reduce((acc, item) => {
@@ -324,6 +324,7 @@ const POSTerminal: React.FC = () => {
     .center { text-align: center; }
     .bold { font-weight: bold; }
     .small { font-size: 10px; }
+    .left {text-align: left}
 
     .line {
       border-top: 1px dashed #000;
@@ -376,20 +377,20 @@ const POSTerminal: React.FC = () => {
 
   <div class="line"></div>
 
-  ${client != null ? `<div class="center small">
-    ${client.name || ""}
+  ${client != null ? `<div class="left small">
+    Nome: ${client?.name || ""}
   </div>
 
-  <div class="center small">
-    CNPJ: ${client.cnpj_cpf || "---"}
+  <div class="left small ">
+    CNPJ: ${client?.cnpj_cpf || "---"}
   </div>
 
-  <div class="center small">
-    ${client.phone || ""}
+  <div class="left small ">
+    Celular: ${client?.phone || ""}
   </div>
 
-  <div class="center small">
-    ${client.logradouro + ", nº " + client.number + ", \n" + client.district || ""}
+  <div class="left small ">
+    ${client?.logradouro + ", nº " + client?.number + ", \n" + client?.district || ""}
   </div>
 
   <div class="line"></div>` : ""}
@@ -404,7 +405,7 @@ const POSTerminal: React.FC = () => {
     <div class="item">
       <div class="bold small">${item.product_name}</div>
       <div class="row small">
-        <span>${item.quantity} x ${Number(item.unit_price).toFixed(2)}</span>
+        <span>${item.quantity}UN x ${Number(item.unit_price).toFixed(2)}</span>
         <span>${(item.quantity * item.unit_price).toFixed(2)}</span>
       </div>
     </div>
@@ -455,8 +456,9 @@ const POSTerminal: React.FC = () => {
       return;
     }
 
-    const client = clientId.length > 0 ? clientId[0] : null;
-
+    const client = clientId || null;
+    console.log("no outro local: ", clientId)
+    console.log("no outro local: ", client)
     // 🔹 Dados do cabeçalho (empresa / venda)
     const data = {
       id: invoiceID || "SEM_ID",
@@ -749,8 +751,8 @@ const POSTerminal: React.FC = () => {
           <div className="flex-1 overflow-y-auto p-6 custom-scrollbar">
             {cart.length === 0 ? (
               <div className="h-full flex flex-col items-center justify-center text-slate-700 opacity-20 select-none">
-                 <span className="material-symbols-outlined text-[120px]">shopping_cart</span>
-                 <p className="text-2xl font-black uppercase tracking-widest mt-4 italic">Carrinho Vazio</p>
+                <span className="material-symbols-outlined text-[120px]">shopping_cart</span>
+                <p className="text-2xl font-black uppercase tracking-widest mt-4 italic">Carrinho Vazio</p>
               </div>
             ) : (
               <table className="w-full border-separate border-spacing-y-3">
@@ -1160,6 +1162,19 @@ const POSTerminal: React.FC = () => {
             Desconto Global (%)
           </h2>
 
+          <input
+            type="number"
+            autoFocus
+            value={discountInput}
+            onChange={(e) => setDiscountInput(e.target.value)}
+            className="w-full bg-black border border-primary text-primary p-3 rounded-lg text-xl font-mono outline-none"
+            placeholder="Digite o percentual"
+            onKeyDown={(e) => {
+              if (e.key === "Enter") handleConfirmDiscount();
+              if (e.key === "Escape") setIsDiscountModalOpen(false);
+            }}
+          />
+          
           <input
             type="number"
             autoFocus

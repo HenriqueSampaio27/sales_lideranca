@@ -293,13 +293,21 @@ const handlePrintCupom = async (invoiceId: number) => {
           ${invoice.items
             .map(
               (item: any) => {
+                console.log(invoice.items)
+                console.log(item.discount_value)
                 value_disc += Number(item.discount_value);
-                value_sub += Number(item.unit_price_original);
-                `
+                value_sub += (Number(item.unit_price_original)*(item.quantity));
+                return `
                 <div>
                   <div class="item">
-                    <span>${item.product_name} x${item.quantity}</span>
-                    <span>${Number(item.unit_price_original).toLocaleString("pt-BR", {
+                    <span>${item.product_name}</span>
+                    <span>${(Number(item.unit_price_original)* Number(item.quantity)).toLocaleString("pt-BR", {
+                      style: "currency",
+                      currency: "BRL",
+                    })}</span>
+                  </div>
+                  <div class="item">
+                    <span>${item.quantity}UN x ${(Number(item.unit_price_original)).toLocaleString("pt-BR", {
                       style: "currency",
                       currency: "BRL",
                     })}</span>

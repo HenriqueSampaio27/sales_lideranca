@@ -536,6 +536,8 @@ app.get('/financial-notes', async (req, res) => {
               'product_name', p.product_name,
               'quantity', ii.quantity,
               'unit_price', ii.unit_price,
+              'unit_price_original', ii.unit_price_original,
+              'discount_value', ii.discount_value,
               'item_total', ii.item_total
             )
           ) FILTER (WHERE ii.id IS NOT NULL),
