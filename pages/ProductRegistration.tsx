@@ -456,13 +456,20 @@ const ProductRegistration: React.FC = () => {
                             {prod.mark}
                           </span>
                         </td>
-                        <td className="px-6 py-5 text-sm font-black text-white">R$ {formatMoney(Number(prod.sale_price))}</td>
-                        <td className="px-6 py-5">
-                          <span className="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-emerald-500">
-                            <span className="size-2 rounded-full bg-emerald-500 animate-pulse"></span>
-                            Ativo
-                          </span>
-                        </td>
+                        <td className="px-6 py-5 text-sm font-black text-white">R$ {formatMoney(Number(prod.sale_price))}</td>  
+                            {prod.active == true ?<td className="px-6 py-5">
+                              <span className="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-emerald-500">
+                                ATIVO
+                              </span>
+                              </td>
+                            :
+                            <td className="px-6 py-5">
+                              <span className="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-red-500">
+                                DESATIVADO
+                              </span>
+                            </td>
+                            }
+                        
                         <td className="px-8 py-5 text-right">
                           <div className="flex justify-end gap-3 opacity-0 group-hover:opacity-100 transition-all transform translate-x-2 group-hover:translate-x-0">
                             <button onClick={() => handleEdit(prod)} className="p-2 text-slate-500 hover:text-primary transition-colors bg-background-dark rounded-lg border border-border-dark">
