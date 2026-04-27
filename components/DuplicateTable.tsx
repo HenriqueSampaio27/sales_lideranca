@@ -6,6 +6,7 @@ import { useState } from 'react';
 type Filters = {
   status?: string;
   date?: string | null;
+  mode?: 'day' | 'month';
 };
 
 type Duplicate = {
@@ -41,9 +42,21 @@ export default function DuplicateTable({ data, filters, onConfirmPayment, onDele
   const matchesStatus =
     !filters.status || dup.status === filters.status;
 
-  const matchesDate =
-    !filters.date ||
-    toISODate(dup.due_date) === toISODate(filters.date);
+  const matchesDate = (() => {
+    if (!filters.date) return true;
+
+    const selected = new Date(filters.date);
+    const due = new Date(dup.due_date);
+
+    if (filters.mode === 'month') {
+      return (
+        selected.getMonth() === due.getMonth() &&
+        selected.getFullYear() === due.getFullYear()
+      );
+    }
+
+    return due.toISOString().slice(0, 10) === filters.date;
+  })();
 
   return matchesStatus && matchesDate;
 });

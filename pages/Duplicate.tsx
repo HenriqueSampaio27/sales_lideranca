@@ -11,6 +11,7 @@ import DuplicateTable from '../components/DuplicateTable';
 type FiltersType = {
   status?: string;
   date?: string | null;
+  mode?: 'day' | 'month';
 };
 
 type DuplicateType = {
@@ -90,17 +91,31 @@ export default function Duplicate() {
     const matchesStatus =
       !filters.status || item.status === filters.status;
 
-    const matchesDate =
-      !filters.date || item.due_date.slice(0, 10) === filters.date;
+    const matchesDate = (() => {
+      if (!filters.date) return true;
+
+      const selected = new Date(filters.date);
+      const due = new Date(item.due_date);
+
+      if (filters.mode === 'month') {
+        return (
+          selected.getMonth() === due.getMonth() &&
+          selected.getFullYear() === due.getFullYear()
+        );
+      }
+
+      // modo dia (default)
+      return due.toISOString().slice(0, 10) === filters.date;
+    })();
 
     return matchesStatus && matchesDate;
   });
 
   const totalValue = filteredData
-  .filter(
-    (item: DuplicateType) =>
-      item.status === 'pending' || item.status === 'delayed'
-  )
+  //.filter(
+  //  (item: DuplicateType) =>
+  //    item.status === 'pending' || item.status === 'delayed'
+  //)
   .reduce((acc, item) => acc + toNumber(item.value), 0);
 
   const today = new Date();

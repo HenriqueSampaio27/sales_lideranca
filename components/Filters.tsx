@@ -5,21 +5,44 @@ import Calendar from './Calendar';
 export default function Filters({ onFilterChange, alertCount, valueDuplicate  }) {
   const [selectedDate, setSelectedDate] = useState(null);
   const [status, setStatus] = useState('');
-
+  const [mode, setMode] = useState<'day' | 'month'>('day');
   // Sempre que os filtros mudarem, avisa o componente pai
   useEffect(() => {
     onFilterChange({
       date: selectedDate,
-      status: status
+      status: status,
+      mode: mode
     });
-  }, [selectedDate, status, onFilterChange]);
+  }, [selectedDate, status, mode, onFilterChange]);
 
   return (
     <div className="col-span-12 lg:col-span-3 space-y-6">
       
       {/* CARD DE FILTROS */}
       <section className="bg-surface-dark p-5 rounded-2xl border border-border-dark shadow-sm">
-        
+        <div className="flex gap-2 mb-4">
+          <button
+            onClick={() => setMode('day')}
+            className={`flex-1 py-2 text-[10px] font-black uppercase rounded-lg ${
+              mode === 'day'
+                ? 'bg-primary text-background-dark'
+                : 'bg-white/5 text-slate-400'
+            }`}
+          >
+            Dia
+          </button>
+
+          <button
+            onClick={() => setMode('month')}
+            className={`flex-1 py-2 text-[10px] font-black uppercase rounded-lg ${
+              mode === 'month'
+                ? 'bg-primary text-background-dark'
+                : 'bg-white/5 text-slate-400'
+            }`}
+          >
+            Mês
+          </button>
+        </div>
         {/* CALENDÁRIO */}
         <Calendar onSelectDate={setSelectedDate} />
 
@@ -49,6 +72,7 @@ export default function Filters({ onFilterChange, alertCount, valueDuplicate  })
             onClick={() => {
               setSelectedDate(null);
               setStatus('');
+              setMode('day');
             }}
             className="w-full py-3 bg-white/5 hover:bg-white/10 text-slate-400 text-[10px] font-black uppercase tracking-widest rounded-xl transition-all border border-border-dark active:scale-95"
           >
