@@ -73,17 +73,16 @@ const StockManagement: React.FC = () => {
     const doc = new jsPDF();
 
     const activeProducts = products.filter((p) => p.active === true);
-    const outOfStock = activeProducts.filter(
-      (p) => Number(p.stock) === 0
-    );
+    //const outOfStock = activeProducts.filter(
+    //  (p) => Number(p.stock) === 0
+    //);
 
     const belowMinimum = activeProducts.filter(
       (p) =>
-        Number(p.stock) > 0 &&
         Number(p.stock) <= Number(p.minStock)
     );
 
-    const allCritical = [...outOfStock, ...belowMinimum];
+    const allCritical = [...belowMinimum];
 
     if (allCritical.length === 0) {
       alert("Nenhum produto crítico encontrado.");
