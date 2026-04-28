@@ -2,6 +2,8 @@ import React, { useEffect, useState } from "react";
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
 import { baseUrl } from "../services/AuthService"
+import { Database } from "lucide-react";
+import { motion } from 'motion/react';
 
 const StockManagement: React.FC = () => {
   const [products, setProducts] = useState<any[]>([]);
@@ -11,6 +13,7 @@ const StockManagement: React.FC = () => {
   const base = baseUrl
   const [outOfStockSize, setOutOfStockSize] = useState(0);
   const [belowMinimumSize, setBelowMinimumSize] = useState(0);
+  const [loadingBackup, setLoadingBackup] = useState(false);
   
   useEffect(() => {
     fetchProducts();
@@ -136,7 +139,36 @@ const StockManagement: React.FC = () => {
   const filteredProducts = products.filter((prod: any) =>
     prod.product_name.toLowerCase().includes(search.toLowerCase()) ||
     prod.barcode?.toLowerCase().includes(search.toLowerCase())
-  );
+    );
+
+  async function handleBackup() {
+    try {
+      setLoadingBackup(true);
+
+      const res = await fetch(`${base}/backup`);
+
+      if (!res.ok) throw new Error();
+
+      const blob = await res.blob();
+      const url = window.URL.createObjectURL(blob);
+
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `backup-${new Date().toISOString().slice(0, 10)}.sql`;
+      
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+
+      window.URL.revokeObjectURL(url);
+
+    } catch (err) {
+      console.error(err);
+      alert("Erro ao gerar backup");
+    } finally {
+      setLoadingBackup(false);
+    }
+  }
 
   // 📄 Paginação
   const indexOfLast = currentPage * itemsPerPage;
@@ -154,6 +186,20 @@ const StockManagement: React.FC = () => {
           <p className="text-slate-500 mt-1 font-medium uppercase tracking-[0.1em] text-xs">Controle logístico, reposição e movimentação de mercadorias.</p>
         </div>
         <div className="flex gap-4">
+            <motion.button 
+              onClick={handleBackup}
+              whileHover={{ scale: 1.05, y: -2 }}
+              whileTap={{ scale: 0.95 }}
+              className="bg-surface-dark/80 backdrop-blur-md border border-border-dark p-4 rounded-full shadow-2xl flex items-center gap-3 group hover:border-primary/50 transition-all"
+            >
+              <span className="w-10 h-10 rounded-full bg-green-500 flex items-center justify-center text-white shadow-lg">
+                <Database size={20} />
+              </span>
+
+              <span className="text-xs font-black text-white/90 pr-2 uppercase tracking-widest">
+                {loadingBackup ? "Gerando..." : "Backup do Sistema"}
+              </span>
+            </motion.button>
             <button onClick={() => generateStockReport(products)} className="flex items-center gap-2 bg-primary text-background-dark px-8 py-3 rounded-xl text-xs font-black uppercase tracking-widest hover:brightness-110 transition-all shadow-xl shadow-primary/10">
               <span className="material-symbols-outlined text-lg">sync_alt</span>
               Emitir nota

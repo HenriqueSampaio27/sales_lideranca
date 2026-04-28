@@ -8,6 +8,8 @@ const { Pool } = require("pg");
 const puppeteer = require("puppeteer");
 const crypto = require("crypto");
 const gerarDanfeHTML = require("./danfeTemplate.cjs")
+const { exec } = require('child_process');
+const path = require('path');
 
 const app = express();
 
@@ -35,13 +37,7 @@ app.use(cors({
   methods: ['GET', 'POST', 'PUT', "PATCH", 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization']
 }));
-// app.use(cors({
-//   origin: ['http://localhost:3000',
-//   'http://192.168.3.142:3000',
-//   "https://henriquesampaio27.github.io"],
-//   methods: ['GET', 'POST', 'PUT', "PATCH", 'DELETE', 'OPTIONS'],
-//   allowedHeaders: ['Content-Type', 'Authorization']
-// }));
+
 app.use(express.json());
 
 const pool = new Pool({
@@ -62,6 +58,31 @@ const storage = multer.diskStorage({
 
 const upload = multer({ storage });
 app.use("/uploads", express.static("uploads"));
+
+const fs = require('fs');
+
+app.get('/backup', async (req, res) => {
+  const fileName = `backup-${Date.now()}.sql`;
+  const dir = path.resolve('./backups');
+
+  // cria pasta se não existir
+  if (!fs.existsSync(dir)) {
+    fs.mkdirSync(dir);
+  }
+
+  const filePath = path.join(dir, fileName);
+
+  const command = `pg_dump ${process.env.DATABASE_URL} -f "${filePath}"`;
+
+  exec(command, (error) => {
+    if (error) {
+      console.error(error);
+      return res.status(500).json({ error: 'Erro ao gerar backup' });
+    }
+
+    res.download(filePath);
+  });
+});
 
 // 🔐 LOGIN
 app.post('/login', async (req, res) => {
