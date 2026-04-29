@@ -11,121 +11,36 @@ const FinanceManagement: React.FC = () => {
 
   const base = baseUrl
   const [searchTerm, setSearchTerm] = useState("");
-const [statusFilter, setStatusFilter] = useState("");
-const [dateFilter, setDateFilter] = useState("");
-const [isPaymentModalOpen, setIsPaymentModalOpen] = useState(false);
-const [selectedNote, setSelectedNote] = useState<any>(null);
-const [paymentValue, setPaymentValue] = useState("");
+  const [statusFilter, setStatusFilter] = useState("");
+  const [dateFilter, setDateFilter] = useState("");
+  const [isPaymentModalOpen, setIsPaymentModalOpen] = useState(false);
+  const [selectedNote, setSelectedNote] = useState<any>(null);
+  const [paymentValue, setPaymentValue] = useState("");
 
   const today = new Date();
   today.setHours(0, 0, 0, 0);
 
-const formatCurrencyCompact = (value: number): string  => {
-  const abs = Math.abs(value)
+  const formatCurrencyCompact = (value: number): string  => {
+    const abs = Math.abs(value)
 
-  // Até 999.999,99 → formato normal
-  if (abs < 1_000_000) {
-    return new Intl.NumberFormat("pt-BR", {
-      style: "currency",
-      currency: "BRL",
-      minimumFractionDigits: 2,
-      maximumFractionDigits: 2,
-    }).format(value)
+    // Até 999.999,99 → formato normal
+    if (abs < 1_000_000) {
+      return new Intl.NumberFormat("pt-BR", {
+        style: "currency",
+        currency: "BRL",
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2,
+      }).format(value)
+    }
+
+    // 1.000.000+ → milhões
+    const millions = value / 1_000_000
+
+    return `R$ ${millions.toLocaleString("pt-BR", {
+      minimumFractionDigits: 1,
+      maximumFractionDigits: 1,
+    })}M`
   }
-
-  // 1.000.000+ → milhões
-  const millions = value / 1_000_000
-
-  return `R$ ${millions.toLocaleString("pt-BR", {
-    minimumFractionDigits: 1,
-    maximumFractionDigits: 1,
-  })}M`
-  }
-
-  const pendingNotDue = notes.reduce((acc, item) => {
-    if (item.status !== "PENDENTE") return acc;
-
-    const dueDate = item.due_date ? new Date(item.due_date) : null;
-    if (!dueDate) return acc;
-
-    dueDate.setHours(0, 0, 0, 0);
-
-    if (dueDate > today) {
-      return acc + (Number(item.total_amount ?? 0) - Number(item.total_paid ?? 0));
-    }
-
-    return acc;
-  }, 0);
-
-  const dueToday = notes.reduce((acc, item) => {
-    if (item.status !== "PENDENTE") return acc;
-
-    const dueDate = item.due_date ? new Date(item.due_date) : null;
-    if (!dueDate) return acc;
-
-    dueDate.setHours(0, 0, 0, 0);
-
-    if (dueDate.getTime() === today.getTime()) {
-      return acc + (Number(item.total_amount ?? 0) - Number(item.total_paid ?? 0));
-    }
-
-    return acc;
-  }, 0);
-
-  const overdue = notes.reduce((acc, item) => {
-    if (item.status !== "PENDENTE") return acc;
-
-    const dueDate = item.due_date ? new Date(item.due_date) : null;
-    if (!dueDate) return acc;
-
-    dueDate.setHours(0, 0, 0, 0);
-
-    if (dueDate < today) {
-      return acc + (Number(item.total_amount ?? 0) - Number(item.total_paid ?? 0));
-    }
-
-    return acc;
-  }, 0);
-
-  const totalPendingCount = notes.filter(
-  (item) => item.status === "PENDENTE"
-).length;
-
-const overdueCount = notes.filter((item) => {
-  if (item.status !== "PENDENTE") return false;
-
-  const dueDate = item.due_date ? new Date(item.due_date) : null;
-  if (!dueDate) return false;
-
-  dueDate.setHours(0, 0, 0, 0);
-
-  return dueDate < today;
-}).length;
-
-const overduePercentage =
-  totalPendingCount > 0
-    ? ((overdueCount / totalPendingCount) * 100).toFixed(2)
-    : 0;
-
-  const fetchFinancialNotes = async () => {
-    try {
-      const response = await fetch(`${base}/financial-notes`);
-
-      if (!response.ok) {
-        throw new Error("Erro ao buscar notas");
-      }
-
-      const data = await response.json();
-
-      setNotes(data);
-
-    } catch (error) {
-      console.error(error);
-    }
-  };
-  console.log(notes)
-
-
   const filteredNotes = notes.filter((note) => {
 
   // 🔎 FILTRO TEXTO (cliente ou documento ou número)
@@ -164,6 +79,89 @@ const overduePercentage =
 
     return true;
   });
+
+  const pendingNotDue = filteredNotes.reduce((acc, item) => {
+    if (item.status !== "PENDENTE") return acc;
+
+    const dueDate = item.due_date ? new Date(item.due_date) : null;
+    if (!dueDate) return acc;
+
+    dueDate.setHours(0, 0, 0, 0);
+
+    if (dueDate > today) {
+      return acc + (Number(item.total_amount ?? 0) - Number(item.total_paid ?? 0));
+    }
+
+    return acc;
+  }, 0);
+
+  const dueToday = filteredNotes.reduce((acc, item) => {
+    if (item.status !== "PENDENTE") return acc;
+
+    const dueDate = item.due_date ? new Date(item.due_date) : null;
+    if (!dueDate) return acc;
+
+    dueDate.setHours(0, 0, 0, 0);
+
+    if (dueDate.getTime() === today.getTime()) {
+      return acc + (Number(item.total_amount ?? 0) - Number(item.total_paid ?? 0));
+    }
+
+    return acc;
+  }, 0);
+
+  const overdue = filteredNotes.reduce((acc, item) => {
+    if (item.status !== "PENDENTE") return acc;
+
+    const dueDate = item.due_date ? new Date(item.due_date) : null;
+    if (!dueDate) return acc;
+
+    dueDate.setHours(0, 0, 0, 0);
+
+    if (dueDate < today) {
+      return acc + (Number(item.total_amount ?? 0) - Number(item.total_paid ?? 0));
+    }
+
+    return acc;
+  }, 0);
+
+  const totalPendingCount = notes.filter(
+    (item) => item.status === "PENDENTE"
+  ).length;
+
+  const overdueCount = notes.filter((item) => {
+    if (item.status !== "PENDENTE") return false;
+
+    const dueDate = item.due_date ? new Date(item.due_date) : null;
+    if (!dueDate) return false;
+
+    dueDate.setHours(0, 0, 0, 0);
+
+    return dueDate < today;
+  }).length;
+
+  const overduePercentage =
+    totalPendingCount > 0
+      ? ((overdueCount / totalPendingCount) * 100).toFixed(2)
+      : 0;
+
+    const fetchFinancialNotes = async () => {
+      try {
+        const response = await fetch(`${base}/financial-notes`);
+
+        if (!response.ok) {
+          throw new Error("Erro ao buscar notas");
+        }
+
+        const data = await response.json();
+
+        setNotes(data);
+
+      } catch (error) {
+        console.error(error);
+      }
+    };
+    console.log(notes)
 
 const currentNotes = filteredNotes.slice(indexOfFirst, indexOfLast);
 
