@@ -295,7 +295,8 @@ const POSTerminal: React.FC = () => {
   };
 
   function gerarCupomTermicoHTML(data, client, items) {
-    console.log("dentro de html: " + client)
+    console.log(client)
+    
     const totalItems = items.rows.reduce((acc, item) => acc + Number(item.quantity), 0);
 
     const total = items.rows.reduce((acc, item) => {
@@ -305,6 +306,7 @@ const POSTerminal: React.FC = () => {
     const discount = items.rows.reduce((acc, item) => {
       return acc + Number(item.discount_value) * Number(item.quantity);
     }, 0);
+    console.log("dentro de html: " + discount)
 
     return `
   <!DOCTYPE html>
@@ -376,8 +378,8 @@ const POSTerminal: React.FC = () => {
   </div>
 
   <div class="line"></div>
-
-  ${client != null ? `<div class="left small">
+  
+  ${client.length != 0 ? `<div class="left small">
     Nome: ${client?.name || ""}
   </div>
 
@@ -408,6 +410,14 @@ const POSTerminal: React.FC = () => {
         <span>${item.quantity}UN x ${Number(item.unit_price).toFixed(2)}</span>
         <span>${(item.quantity * item.unit_price).toFixed(2)}</span>
       </div>
+      ${discount != 0 ? 
+        `<div class="row small">
+          <span>Desconto</span>
+          <span>${Number(item.discount_value).toLocaleString("pt-BR", {
+            style: "currency",
+            currency: "BRL",
+          })}</span>
+          </div>` : ""}
     </div>
   `).join("")}
 
@@ -423,10 +433,10 @@ const POSTerminal: React.FC = () => {
     <span>${total.toFixed(2)}</span>
   </div>
 
-  <div class="row small">
+  ${discount != 0? `<div class="row small">
     <span>Desconto:</span>
     <span>${discount.toFixed(2)}</span>
-  </div>
+  </div>`: ""}
 
   <div class="row bold">
     <span>TOTAL:</span>
@@ -1174,7 +1184,7 @@ const POSTerminal: React.FC = () => {
               if (e.key === "Escape") setIsDiscountModalOpen(false);
             }}
           />
-          
+
           <input
             type="number"
             autoFocus
