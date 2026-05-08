@@ -8,6 +8,7 @@ export enum Page {
   POS = 'pos',
   FINANCIAL = 'financial',
   DUPLICATE = 'duplicate',
+  EXPENSES = 'expenses',
 }
 
 export interface Product {

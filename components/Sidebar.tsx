@@ -16,7 +16,8 @@ const Sidebar: React.FC<SidebarProps> = ({ currentPage, onPageChange }) => {
     { path: "/clients", label: "Clientes", icon: "groups" },
     { path: "/financial", label: "Financeiro", icon: "attach_money" },
     { path: "/pos", label: "Terminal PDV", icon: "shopping_cart_checkout" },
-    { path: "/duplicate", label: "Duplicatas", icon: "attach_money"}
+    { path: "/duplicate", label: "Duplicatas", icon: "attach_money"},
+    { path: "/expenses", label: "Despesas", icon: "receipt_long"}
   ];
 
   return (

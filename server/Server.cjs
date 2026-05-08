@@ -950,8 +950,6 @@ app.post("/invoices/:id/send-email", async (req, res) => {
 });
 
 app.post('/duplicates', async (req, res) => {
-  console.log("🔥 CHEGOU NA ROTA DUPLICATES");
-  console.log(req.body);
   try {
     const { client, cnpj, document, dueDate, value, status } = req.body;
 
@@ -1056,4 +1054,80 @@ app.delete('/duplicates/:id', async (req, res) => {
   }
 });
 
-//app.listen(5000, () => console.log("Servidor rodando na porta 5000"));
+app.post('/expenses', async (req, res) => {
+  try {
+    const { name, value, } = req.body;
+
+    // validação básica
+    if (!name || !value) {
+      return res.status(400).json({
+        message: "Campos obrigatórios não informados"
+      });
+    }
+
+    const result = await pool.query(
+      `INSERT INTO expenses 
+      (name, value)
+      VALUES ($1, $2)
+      RETURNING *`,
+      [
+        name,
+        value,
+      ]
+    );
+
+    res.status(201).json(result.rows[0]);
+
+  } catch (error) {
+    console.error("Erro ao salvar despesa:", error);
+
+    // erro de campo obrigatório
+    if (error.code === "23502") {
+      return res.status(400).json({
+        message: `Campo obrigatório não informado: ${error.column}`
+      });
+    }
+
+    res.status(500).json({
+      message: "Erro ao salvar despesa"
+    });
+  }
+});
+
+app.get('/expenses', async (req, res) => {
+  try {
+    const result = await pool.query(
+      "SELECT * FROM expenses ORDER BY created_at DESC"
+    );
+
+    res.json(result.rows);
+
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({
+      message: "Erro ao buscar despesas"
+    });
+  }
+});
+
+app.delete('/expenses/:id', async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const result = await pool.query(
+      `DELETE FROM expenses WHERE id = $1 RETURNING *`,
+      [id]
+    );
+
+    if (result.rowCount === 0) {
+      return res.status(404).json({ message: 'Despesa não encontrada' });
+    }
+
+    res.json({ message: 'Despesa deletada com sucesso' });
+
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: 'Erro ao deletar despesa' });
+  }
+});
+

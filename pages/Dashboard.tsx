@@ -51,6 +51,7 @@ const Dashboard: React.FC = () => {
   const [totalPedding, setTotalPedding] = useState("")
   const [estimated, setEstimated] = useState("")
   const [valueDuplicate, setValueDuplicate] = useState("")
+  const [expensesAdd, setExpensesAdd] = useState([])
   const [data, setData] = useState<DuplicateType[]>([]);
   const base = baseUrl
 
@@ -175,6 +176,17 @@ const Dashboard: React.FC = () => {
     setChartData([]);
   }
 };  
+async function load() {
+      const res = await fetch(`${base}/duplicates`);
+      const json = await res.json();
+      setData(json);
+    }
+
+    async function loadExpenses() {
+      const res = await fetch(`${base}/expenses`);
+      const json = await res.json();
+      setExpensesAdd(json);
+    }
 
   const totalDuplicatesValue = data
     .filter((item: any) =>
@@ -186,11 +198,19 @@ const Dashboard: React.FC = () => {
     }, 0);
   const valueDuplicatex = formatCurrencyCompact(totalDuplicatesValue);
 
+  const totalExpensesValue = expensesAdd
+    .reduce((acc: number, item: any) => {
+      const value = Number(item.value);
+      return acc + (isNaN(value) ? 0 : value);
+    }, 0);
+  const valueExpenses = formatCurrencyCompact(totalExpensesValue);
+
   const kpis = [
     { label: 'Baixo Estoque', value: qntLow, change: 'Atenção', color: 'amber', icon: <AlertTriangle className="size-5" /> },
     { label: 'Esgotados', value: qntEmpty, change: 'Crítico', color: 'rose', icon: <XCircle className="size-5" /> },
     { label: 'Valor em Estoque', value: valueStock, change: '', color: 'emerald', icon: <Package className="size-5" /> },
     { label: 'Valor Duplicatas', value: valueDuplicatex, change: '', color: 'emerald', icon: <FileText className="size-5" /> },
+    { label: 'Valor Despesas', value: valueExpenses, change: '', color: 'emerald', icon: <FileText className="size-5" /> },
     { label: 'Total Faturado', value: totalPaid, change: '', color: 'primary', icon: <DollarSign className="size-5" /> },
     { label: 'Total Pendência', value: totalPedding, change: '', color: 'primary', icon: <BarChart3 className="size-5" /> },
     { label: 'Total de Vendas', value: totalBilled, change: '', color: 'primary', icon: <ShoppingCart className="size-5" /> },
@@ -217,13 +237,8 @@ const Dashboard: React.FC = () => {
   }, [timeFilter])
 
   useEffect(() => {
-    async function load() {
-      const res = await fetch(`${base}/duplicates`);
-      const json = await res.json();
-      setData(json);
-    }
-
     load();
+    loadExpenses();
   }, []);
 
 
@@ -234,8 +249,8 @@ const Dashboard: React.FC = () => {
 
         <div className="p-8 space-y-8">
           {/* KPI Grid - Row 1 (Stock Indicators - 3 items) */}
-          <section className="grid grid-cols-1 md:grid-cols-4 gap-4">
-            {kpis.slice(0, 4).map((kpi, idx) => {
+          <section className="grid grid-cols-1 md:grid-cols-5 gap-4">
+            {kpis.slice(0, 5).map((kpi, idx) => {
               const colors = getColorClasses(kpi.color || 'primary');
               return (
                 <motion.div 
@@ -260,7 +275,7 @@ const Dashboard: React.FC = () => {
 
           {/* KPI Grid - Row 2 (Financial Indicators - 4 items) */}
           <section className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-            {kpis.slice(4).map((kpi, idx) => {
+            {kpis.slice(5).map((kpi, idx) => {
               const colors = getColorClasses(kpi.color || 'primary');
               return (
                 <motion.div 

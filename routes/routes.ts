@@ -2,11 +2,11 @@ import Dashboard from "../pages/Dashboard";
 import StockManagement from "../pages/StockManagement";
 import ProductRegistration from "../pages/ProductRegistration";
 import ClientManagement from "../pages/ClientManagement";
-
 import Financial from "../pages/FinanceManagement";
 import POSTerminal from "../pages/POSTerminal";
 import { ComponentType } from "react";
 import Duplicate from "@/pages/Duplicate";
+import Expenses from "@/pages/Expenses";
 
 type AppRoute = {
   path: string;
@@ -20,5 +20,6 @@ export const appRoutes: AppRoute[] = [
   { path: "/clients", component: ClientManagement},
   { path: "/financial", component: Financial },
   { path: "/pos", component: POSTerminal },
-  { path: "/duplicate", component: Duplicate}
+  { path: "/duplicate", component: Duplicate},
+  { path: "/expenses", component: Expenses},
 ];
