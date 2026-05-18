@@ -14,6 +14,8 @@ const StockManagement: React.FC = () => {
   const [outOfStockSize, setOutOfStockSize] = useState(0);
   const [belowMinimumSize, setBelowMinimumSize] = useState(0);
   const [loadingBackup, setLoadingBackup] = useState(false);
+  const [showReportModal, setShowReportModal] = useState(false);
+  const [selectedProducts, setSelectedProducts] = useState<any[]>([]);
   
   useEffect(() => {
     fetchProducts();
@@ -72,46 +74,126 @@ const StockManagement: React.FC = () => {
     };
   }
 
-  function generateStockReport(products: any[]) {
-    const doc = new jsPDF();
-
-    const activeProducts = products.filter((p) => p.active === true);
-    //const outOfStock = activeProducts.filter(
-    //  (p) => Number(p.stock) === 0
-    //);
-
-    const belowMinimum = activeProducts.filter(
-      (p) =>
-        Number(p.stock) <= Number(p.minStock)
+  function openReportModal() {
+    const activeProducts = products.filter(
+      (p) => p.active === true
     );
 
-    const allCritical = [...belowMinimum];
+    const criticalProducts = activeProducts
+      .filter(
+        (p) =>
+          Number(p.stock) <=
+          Number(p.minStock)
+      )
+      .map((p) => ({
+        ...p,
+        requestQty:
+          Number(p.minStock) -
+          Number(p.stock) +
+          1,
+        requestUnit: "UN",
+      }));
 
-    if (allCritical.length === 0) {
+    if (criticalProducts.length === 0) {
       alert("Nenhum produto crítico encontrado.");
       return;
     }
 
-    const tableData = allCritical.map((p) => [
+    setSelectedProducts(criticalProducts);
+    setShowReportModal(true);
+  }
+
+  function generateStockReport(selected: any[]) {
+    const doc = new jsPDF();
+
+    if (selected.length === 0) {
+      alert("Selecione pelo menos um item.");
+      return;
+    }
+
+    const tableData = selected.map((p) => [
       p.product_name,
       p.mark,
-      p.stock,
-      p.minStock,
-      Number(p.stock) === 0 ? "ZERADO" : "ABAIXO DO MÍNIMO",
+      p.requestQty,
+      p.requestUnit
     ]);
 
     doc.setFontSize(16);
-    doc.text("Relatório de Produtos Críticos", 14, 15);
+    doc.text("Lista de compras", 14, 15);
 
     autoTable(doc, {
       startY: 25,
-      head: [["Produto", "Marca", "Qtd Atual", "Estoque Mínimo", "Status"]],
+      head: [[
+        "Produto",
+        "Marca",
+        "Quantidade",
+        "Unidade"
+      ]],
       body: tableData,
     });
 
     doc.save("relatorio-estoque-critico.pdf");
+
+    setShowReportModal(false);
   }
 
+  function toggleProduct(prod: any) {
+    setSelectedProducts((prev) => {
+      const exists = prev.some(
+        (p) => p.id === prod.id
+      );
+
+      if (exists) {
+        return prev.filter(
+          (p) => p.id !== prod.id
+        );
+      }
+
+      return [
+        ...prev,
+        {
+          ...prod,
+          requestQty:
+            Number(prod.minStock) -
+            Number(prod.stock) +
+            1,
+          requestUnit: "UN",
+        },
+      ];
+    });
+  }
+
+  function updateRequestUnit(
+    productId: number,
+    value: string
+  ) {
+    setSelectedProducts((prev) =>
+      prev.map((p) =>
+        p.id === productId
+          ? {
+              ...p,
+              requestUnit: value,
+            }
+          : p
+      )
+    );
+  }
+
+  function updateRequestQty(
+    productId: number,
+    value: string
+  ) {
+    setSelectedProducts((prev) =>
+      prev.map((p) =>
+        p.id === productId
+          ? {
+              ...p,
+              requestQty: Number(value),
+            }
+          : p
+      )
+    );
+  }
 
   const fetchProducts = async () => {
     try {
@@ -177,7 +259,206 @@ const StockManagement: React.FC = () => {
 
   return (
     <div className="p-8 space-y-8">
+  
+      {showReportModal && (
+        <div className="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+          <motion.div
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            className="bg-surface-dark border border-border-dark rounded-[2rem] w-full max-w-5xl overflow-hidden shadow-[0_20px_80px_rgba(0,0,0,0.5)]"
+          >
+            {/* HEADER */}
+            <div className="p-6 border-b border-border-dark flex items-center justify-between">
+              <div>
+                <h2 className="text-2xl font-black text-white uppercase italic">
+                  Lista de Compras
+                </h2>
 
+                <p className="text-slate-500 text-xs uppercase tracking-widest mt-1">
+                  Escolha os itens, quantidade e unidade do pedido
+                </p>
+              </div>
+
+              <button
+                onClick={() => setShowReportModal(false)}
+                className="w-10 h-10 rounded-full bg-black/20 hover:bg-black/40 text-slate-400 hover:text-white transition-all flex items-center justify-center"
+              >
+                ✕
+              </button>
+            </div>
+
+            {/* CABEÇALHO */}
+            <div className="grid grid-cols-[1.6fr_110px_110px_130px_130px_80px] px-6 py-4 border-b border-border-dark text-[10px] uppercase tracking-widest font-black text-slate-500 bg-black/20">
+              <span>Produto</span>
+              <span className="text-center">
+                Atual
+              </span>
+              <span className="text-center">
+                Min.
+              </span>
+              <span className="text-center">
+                Quantidade
+              </span>
+              <span className="text-center">
+                Unidade
+              </span>
+              <span className="text-center">
+                Incluir
+              </span>
+            </div>
+
+            {/* LISTA */}
+            <div className="max-h-[500px] overflow-y-auto">
+              {products
+                .filter(
+                  (p) =>
+                    p.active &&
+                    Number(p.stock) <=
+                      Number(p.minStock)
+                )
+                .map((prod) => {
+                  const selectedProduct =
+                    selectedProducts.find(
+                      (p) => p.id === prod.id
+                    );
+
+                  const selected =
+                    !!selectedProduct;
+
+                  return (
+                    <div
+                      key={prod.id}
+                      className="grid grid-cols-[1.6fr_110px_110px_130px_130px_80px] items-center gap-4 px-6 py-5 border-b border-border-dark hover:bg-white/[0.03] transition-all"
+                    >
+                      {/* PRODUTO */}
+                      <div>
+                        <p className="text-white font-bold text-sm">
+                          {prod.product_name}
+                        </p>
+
+                        <div className="flex gap-2 mt-1">
+                          <span className="text-[10px] text-slate-500 uppercase">
+                            Marca:
+                          </span>
+
+                          <span className="text-[10px] text-slate-400 font-bold">
+                            {prod.mark}
+                          </span>
+                        </div>
+                      </div>
+
+                      {/* ESTOQUE */}
+                      <div className="text-center">
+                        <span className="font-black text-lg text-rose-500">
+                          {prod.stock}
+                        </span>
+                      </div>
+
+                      {/* MÍNIMO */}
+                      <div className="text-center">
+                        <span className="font-bold text-slate-300">
+                          {prod.minStock}
+                        </span>
+                      </div>
+
+                      {/* QUANTIDADE */}
+                      <div>
+                        <input
+                          type="number"
+                          min={1}
+                          disabled={!selected}
+                          value={
+                            selectedProduct?.requestQty ||
+                            ""
+                          }
+                          onChange={(e) =>
+                            updateRequestQty(
+                              prod.id,
+                              e.target.value
+                            )
+                          }
+                          className="w-full bg-background-dark border border-border-dark rounded-xl px-4 py-2 text-white text-center font-bold outline-none focus:ring-2 focus:ring-primary disabled:opacity-40"
+                        />
+                      </div>
+
+                      {/* UNIDADE */}
+                      <div>
+                        <input
+                          type="text"
+                          maxLength={10}
+                          disabled={!selected}
+                          placeholder="UN"
+                          value={
+                            selectedProduct?.requestUnit ||
+                            ""
+                          }
+                          onChange={(e) =>
+                            updateRequestUnit(
+                              prod.id,
+                              e.target.value.toUpperCase()
+                            )
+                          }
+                          className="w-full bg-background-dark border border-border-dark rounded-xl px-4 py-2 text-white text-center font-bold uppercase outline-none focus:ring-2 focus:ring-primary disabled:opacity-40"
+                        />
+                      </div>
+
+                      {/* CHECK */}
+                      <div className="flex justify-center">
+                        <button
+                          onClick={() =>
+                            toggleProduct(prod)
+                          }
+                          className={`w-7 h-7 rounded-lg border transition-all flex items-center justify-center ${
+                            selected
+                              ? "bg-primary border-primary text-black"
+                              : "border-border-dark bg-background-dark text-transparent"
+                          }`}
+                        >
+                          ✓
+                        </button>
+                      </div>
+                    </div>
+                  );
+                })}
+            </div>
+
+            {/* FOOTER */}
+            <div className="p-6 border-t border-border-dark flex items-center justify-between bg-black/10">
+              <div>
+                <p className="text-xs uppercase tracking-widest text-slate-500 font-bold">
+                  Produtos Selecionados
+                </p>
+
+                <p className="text-2xl font-black text-white">
+                  {selectedProducts.length}
+                </p>
+              </div>
+
+              <div className="flex gap-4">
+                <button
+                  onClick={() =>
+                    setShowReportModal(false)
+                  }
+                  className="px-6 py-3 rounded-xl border border-border-dark text-slate-400 font-bold hover:border-slate-600 transition-all"
+                >
+                  Cancelar
+                </button>
+
+                <button
+                  onClick={() =>
+                    generateStockReport(
+                      selectedProducts
+                    )
+                  }
+                  className="bg-primary text-black px-8 py-3 rounded-xl font-black uppercase tracking-widest hover:brightness-110 transition-all"
+                >
+                  Gerar PDF
+                </button>
+              </div>
+            </div>
+          </motion.div>
+        </div>
+      )}
       {/* 🔎 BUSCA */}
       <div className="p-8 space-y-8 animate-in fade-in slide-in-from-bottom-6 duration-700">
       <div className="flex flex-col md:flex-row justify-between items-end gap-6 border-b border-border-dark pb-8">
@@ -200,8 +481,13 @@ const StockManagement: React.FC = () => {
                 {loadingBackup ? "Gerando..." : "Backup do Sistema"}
               </span>
             </motion.button>
-            <button onClick={() => generateStockReport(products)} className="flex items-center gap-2 bg-primary text-background-dark px-8 py-3 rounded-xl text-xs font-black uppercase tracking-widest hover:brightness-110 transition-all shadow-xl shadow-primary/10">
-              <span className="material-symbols-outlined text-lg">sync_alt</span>
+            <button
+              onClick={openReportModal}
+              className="flex items-center gap-2 bg-primary text-background-dark px-8 py-3 rounded-xl text-xs font-black uppercase tracking-widest hover:brightness-110 transition-all shadow-xl shadow-primary/10"
+            >
+              <span className="material-symbols-outlined text-lg">
+                sync_alt
+              </span>
               Emitir nota
             </button>
         </div>
