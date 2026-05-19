@@ -25,7 +25,7 @@ const Login: React.FC<LoginProps> = ({ onLogin }) => {
         onLogin(); // Notifica o App.tsx (se necessário)
         
         // Redireciona para a rota desejada (ex: /vendas ou /dashboard)
-        navigate('/dashboard'); 
+        navigate('/pos'); 
       }
     } catch (error) {
       alert("Erro ao entrar: Verifique usuário e senha.");

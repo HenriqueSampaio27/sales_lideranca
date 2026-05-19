@@ -169,11 +169,11 @@ const POSTerminal: React.FC = () => {
 
   function exit(){
     if (
-          !isClientModalOpen &&
-          !isProductModalOpen &&
+          !isClientModalOpen ||
+          !isProductModalOpen ||
           !isPaymentModalOpen
         ) {
-          navigate("/dashboard");
+          navigate("/stock");
           return;
         }
   }
@@ -610,11 +610,11 @@ const POSTerminal: React.FC = () => {
       // ESC → Fecha qualquer modal
       if (e.key === "Escape") {
         if (
-          !isClientModalOpen &&
-          !isProductModalOpen &&
+          !isClientModalOpen ||
+          !isProductModalOpen ||
           !isPaymentModalOpen
         ) {
-          navigate("/dashboard");
+          navigate("/stock");
           return;
         }
 
