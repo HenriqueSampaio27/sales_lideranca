@@ -16,6 +16,7 @@ const StockManagement: React.FC = () => {
   const [loadingBackup, setLoadingBackup] = useState(false);
   const [showReportModal, setShowReportModal] = useState(false);
   const [selectedProducts, setSelectedProducts] = useState<any[]>([]);
+  const [stockFilter, setStockFilter] = useState<"all" | "out" | "minimum">("all");
   
   useEffect(() => {
     fetchProducts();
@@ -218,39 +219,42 @@ const StockManagement: React.FC = () => {
   };
 
   // 🔎 Filtro por nome OU código de barras
-  const filteredProducts = products.filter((prod: any) =>
-    prod.product_name.toLowerCase().includes(search.toLowerCase()) ||
-    prod.barcode?.toLowerCase().includes(search.toLowerCase())
-    );
+  const filteredProducts =
+  products.filter(
+    (prod: any) => {
+      const matchSearch =
+        prod.product_name
+          .toLowerCase()
+          .includes(
+            search.toLowerCase()
+          ) ||
+        prod.barcode
+          ?.toLowerCase()
+          .includes(
+            search.toLowerCase()
+          );
 
-  async function handleBackup() {
-    try {
-      setLoadingBackup(true);
+      const stock =
+        Number(prod.stock);
 
-      const res = await fetch(`${base}/backup`);
+      const minStock =
+        Number(prod.minStock);
 
-      if (!res.ok) throw new Error();
+      const matchFilter =
+        stockFilter === "all"
+          ? true
+          : stockFilter ===
+            "out"
+          ? stock === 0
+          : stock > 0 &&
+            stock <= minStock;
 
-      const blob = await res.blob();
-      const url = window.URL.createObjectURL(blob);
-
-      const a = document.createElement("a");
-      a.href = url;
-      a.download = `backup-${new Date().toISOString().slice(0, 10)}.sql`;
-      
-      document.body.appendChild(a);
-      a.click();
-      a.remove();
-
-      window.URL.revokeObjectURL(url);
-
-    } catch (err) {
-      console.error(err);
-      alert("Erro ao gerar backup");
-    } finally {
-      setLoadingBackup(false);
+      return (
+        matchSearch &&
+        matchFilter
+      );
     }
-  }
+  );
 
   // 📄 Paginação
   const indexOfLast = currentPage * itemsPerPage;
@@ -468,7 +472,7 @@ const StockManagement: React.FC = () => {
         </div>
         <div className="flex gap-4">
             <motion.button 
-              onClick={handleBackup}
+
               whileHover={{ scale: 1.05, y: -2 }}
               whileTap={{ scale: 0.95 }}
               className="bg-surface-dark/80 backdrop-blur-md border border-border-dark p-4 rounded-full shadow-2xl flex items-center gap-3 group hover:border-primary/50 transition-all"
@@ -518,6 +522,51 @@ const StockManagement: React.FC = () => {
           placeholder="Buscar por nome ou código de barras..."
           className="bg-background-dark border border-border-dark rounded-xl px-4 py-2 text-white text-sm w-80 outline-none focus:ring-2 focus:ring-primary"
         />
+
+        <div className="flex gap-3 flex-wrap">
+          <button
+            onClick={() =>
+              setStockFilter("all")
+            }
+            className={`px-5 py-2 rounded-xl text-xs font-black uppercase tracking-widest transition-all border ${
+              stockFilter === "all"
+                ? "bg-primary text-black border-primary"
+                : "border-border-dark text-slate-400 hover:text-white"
+            }`}
+          >
+            Todos
+          </button>
+
+          <button
+            onClick={() =>
+              setStockFilter("out")
+            }
+            className={`px-5 py-2 rounded-xl text-xs font-black uppercase tracking-widest transition-all border ${
+              stockFilter === "out"
+                ? "bg-rose-500 text-white border-rose-500"
+                : "border-border-dark text-slate-400 hover:text-white"
+            }`}
+          >
+            Zerados ({outOfStockSize})
+          </button>
+
+          <button
+            onClick={() =>
+              setStockFilter(
+                "minimum"
+              )
+            }
+            className={`px-5 py-2 rounded-xl text-xs font-black uppercase tracking-widest transition-all border ${
+              stockFilter ===
+              "minimum"
+                ? "bg-amber-500 text-black border-amber-500"
+                : "border-border-dark text-slate-400 hover:text-white"
+            }`}
+          >
+            Estoque mínimo (
+            {belowMinimumSize})
+          </button>
+        </div>
       {/* 📋 TABELA */}
       <div className="bg-surface-dark border border-border-dark rounded-2xl overflow-hidden">
         <div className="overflow-x-auto">

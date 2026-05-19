@@ -9,8 +9,17 @@ interface SidebarProps {
 }
 
 const Sidebar: React.FC<SidebarProps> = ({ currentPage, onPageChange }) => {
+
+  const user = JSON.parse(
+    localStorage.getItem("user") || "{}"
+  );
+
+  const isAdmin =
+    user?.role?.toLowerCase() ===
+    "admin";
+  
   const menuItems = [
-    { path: "/dashboard", label: "Dashboard", icon: "dashboard" },
+    { path: "/dashboard", label: "Dashboard", icon: "dashboard", adminOnly: true },
     { path: "/stock", label: "Estoque", icon: "package_2" },
     { path: "/registration", label: "Produtos", icon: "inventory_2" },
     { path: "/clients", label: "Clientes", icon: "groups" },
@@ -19,6 +28,18 @@ const Sidebar: React.FC<SidebarProps> = ({ currentPage, onPageChange }) => {
     { path: "/duplicate", label: "Duplicatas", icon: "attach_money"},
     { path: "/expenses", label: "Despesas", icon: "receipt_long"}
   ];
+
+  const filteredMenuItems =
+    menuItems.filter((item) => {
+      if (
+        item.adminOnly &&
+        !isAdmin
+      ) {
+        return false;
+      }
+
+      return true;
+    });
 
   return (
     <aside className="w-64 border-r border-border-dark flex flex-col bg-surface-dark shrink-0 fixed h-full z-30">
@@ -32,7 +53,7 @@ const Sidebar: React.FC<SidebarProps> = ({ currentPage, onPageChange }) => {
         </div>
       </div>
       <nav className="flex flex-col gap-2 px-4">
-        {menuItems.map((item) => (
+        {filteredMenuItems.map((item) => (
           <NavLink
             key={item.path}
             to={item.path}

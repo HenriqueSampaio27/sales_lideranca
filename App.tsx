@@ -29,11 +29,48 @@ function App() {
         >
           {appRoutes.map((route) => {
             const Component = route.component;
+
+            let user = null;
+
+            try {
+              const storedUser =
+                localStorage.getItem("user");
+
+              user =
+                storedUser &&
+                storedUser !== "undefined"
+                  ? JSON.parse(storedUser)
+                  : null;
+            } catch (error) {
+              console.error(
+                "Erro ao ler user do localStorage",
+                error
+              );
+
+              localStorage.removeItem(
+                "user"
+              );
+            }
+
+            const isAdmin =
+              user?.role?.toLowerCase() ===
+              "admin";
+            
             return (
               <Route
                 key={route.path}
                 path={route.path}
-                element={<Component />}
+                element={
+                  route.adminOnly &&
+                  !isAdmin ? (
+                    <Navigate
+                      to="/pos"
+                      replace
+                    />
+                  ) : (
+                    <Component />
+                  )
+                }
               />
             );
           })}

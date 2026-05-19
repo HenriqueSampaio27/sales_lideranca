@@ -292,6 +292,7 @@ const POSTerminal: React.FC = () => {
       alert("Erro na conexão com servidor");
       setIsSaving(false);
     }
+
   };
 
   function gerarCupomTermicoHTML(data, client, items) {
@@ -563,9 +564,7 @@ const POSTerminal: React.FC = () => {
 
     window.open(url, "_blank");
   };
-  
-  
-    // 
+
   useEffect(() => {
     inputRef.current?.focus();   
     const updateTime = () => {
@@ -1251,9 +1250,27 @@ const POSTerminal: React.FC = () => {
               advanceAmount: data.advanceAmount,
               dueDate: data.paymentDate
             });
+            setIsPendingModalOpen(false);
 
-            handlePrint(); // imprime só depois de salvar
+            
+            const confirmPrint = window.confirm(
+              "Deseja imprimir o cupom?"
+            );
+
+            if (confirmPrint) {
+              handlePrint();
+            }
+
+            // RESETA SEMPRE
+            setSaleCompleted(false);
+            setIsPaymentOpen(false);
+            setCart([]);
+            setPayments([]);
+            setDiscount(0);
+            setSelectedClient(null);
+            setCartCupom([]);
           }}
+        
         />
       )}
     </div>

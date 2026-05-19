@@ -11,10 +11,11 @@ import Expenses from "@/pages/Expenses";
 type AppRoute = {
   path: string;
   component: ComponentType;
+  adminOnly?: boolean;
 };
 
 export const appRoutes: AppRoute[] = [
-  { path: "/dashboard", component: Dashboard },
+  { path: "/dashboard", component: Dashboard, adminOnly: true },
   { path: "/stock", component: StockManagement},
   { path: "/registration", component: ProductRegistration},
   { path: "/clients", component: ClientManagement},
