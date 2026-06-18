@@ -15,7 +15,7 @@ type AppRoute = {
 };
 
 export const appRoutes: AppRoute[] = [
-  { path: "/dashboard", component: Dashboard, adminOnly: true },
+  { path: "/dashboard", component: Dashboard, adminOnly: false },
   { path: "/stock", component: StockManagement},
   { path: "/registration", component: ProductRegistration},
   { path: "/clients", component: ClientManagement},

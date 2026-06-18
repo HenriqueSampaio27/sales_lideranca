@@ -25,7 +25,7 @@ app.use(cors({
     if (!origin) return callback(null, true);
 
     if (
-      origin.startsWith('http://192.168.3.') ||
+      origin.startsWith('http://10.0.0.') ||
       origin === 'http://localhost:3000' ||
       origin === 'https://henriquesampaio27.github.io'
     ) {
@@ -45,7 +45,7 @@ const pool = new Pool({
 });
 
 const multer = require("multer");
-const path = require("path");
+
 
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {

@@ -10,13 +10,13 @@ interface SidebarProps {
 
 const Sidebar: React.FC<SidebarProps> = ({ currentPage, onPageChange }) => {
 
-  const user = JSON.parse(
-    localStorage.getItem("user") || "{}"
-  );
+  //const user = JSON.parse(
+  //  localStorage.getItem("user") || "{}"
+  //);
 
-  const isAdmin =
-    user?.role?.toLowerCase() ===
-    "admin";
+  //const isAdmin =
+  //  user?.role?.toLowerCase() ===
+  //  "admin";
   
   const menuItems = [
     { path: "/dashboard", label: "Dashboard", icon: "dashboard", adminOnly: true },
@@ -32,8 +32,8 @@ const Sidebar: React.FC<SidebarProps> = ({ currentPage, onPageChange }) => {
   const filteredMenuItems =
     menuItems.filter((item) => {
       if (
-        item.adminOnly &&
-        !isAdmin
+        item.adminOnly 
+        //!isAdmin
       ) {
         return false;
       }
@@ -53,7 +53,7 @@ const Sidebar: React.FC<SidebarProps> = ({ currentPage, onPageChange }) => {
         </div>
       </div>
       <nav className="flex flex-col gap-2 px-4">
-        {filteredMenuItems.map((item) => (
+        {menuItems.map((item) => (
           <NavLink
             key={item.path}
             to={item.path}
