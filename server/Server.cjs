@@ -1056,7 +1056,7 @@ app.delete('/duplicates/:id', async (req, res) => {
 
 app.post('/expenses', async (req, res) => {
   try {
-    const { name, value, } = req.body;
+    const { name, value, due_date  } = req.body;
 
     // validação básica
     if (!name || !value) {
@@ -1067,12 +1067,13 @@ app.post('/expenses', async (req, res) => {
 
     const result = await pool.query(
       `INSERT INTO expenses 
-      (name, value)
-      VALUES ($1, $2)
+      (name, value, due_date)
+      VALUES ($1, $2, $3)
       RETURNING *`,
       [
         name,
         value,
+        due_date
       ]
     );
 
