@@ -61,29 +61,50 @@ app.use("/uploads", express.static("uploads"));
 
 const fs = require('fs');
 
-app.get("/backup", (req, res) => {
-  const backupDir = path.join(__dirname, "backups");
+app.get("/backup", async (req, res) => {
+  const fileName = `backup-${Date.now()}.sql`;
+  const dir = path.resolve("./backups");
 
-  if (!fs.existsSync(backupDir)) {
-    fs.mkdirSync(backupDir);
+  // Cria a pasta se não existir
+  if (!fs.existsSync(dir)) {
+    fs.mkdirSync(dir);
   }
 
-  const fileName = `backup-${Date.now()}.sql`;
-  const filePath = path.join(backupDir, fileName);
+  const filePath = path.join(dir, fileName);
 
-  const command = `"C:\\Program Files\\PostgreSQL\\18\\bin\\pg_dump.exe" -h 10.0.0.148 -p 5432 -U postgres sales_lider -f "${filePath}"`;
+  // Comando do pg_dump
+  const command = `pg_dump -h 10.0.0.148 -p 5432 -U postgres sales_lider -f "${filePath}"`;
 
-  exec(command, (error, stdout, stderr) => {
-    if (error) {
-      console.error(stderr);
-      return res.status(500).json({
-        error: "Erro ao gerar backup",
-        details: stderr,
+  exec(
+    command,
+    {
+      env: {
+        ...process.env,
+        PGPASSWORD: process.env.DB_PASSWORD,
+      },
+    },
+    (error) => {
+      if (error) {
+        console.error(error);
+        return res.status(500).json({
+          error: "Erro ao gerar backup",
+        });
+      }
+
+      res.download(filePath, fileName, (err) => {
+        if (err) {
+          console.error(err);
+        }
+
+        // Remove o arquivo após o download
+        fs.unlink(filePath, (unlinkErr) => {
+          if (unlinkErr) {
+            console.error("Erro ao remover backup temporário:", unlinkErr);
+          }
+        });
       });
     }
-
-    res.download(filePath);
-  });
+  );
 });
 
 // 🔐 LOGIN
