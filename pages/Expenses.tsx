@@ -17,12 +17,9 @@ type FiltersType = {
 
 type DuplicateType = {
   id: string;
-  client: string;
-  cnpj: string;
-  document: string;
+  name: string;
   due_date: string;
   value: number;
-  status: 'pending' | 'delayed' | 'paid';
   initials: string;
 };
 
@@ -34,7 +31,7 @@ export default function Expenses() {
         status: '',
         date: null
     });
-  const [data, setData] = useState([]);
+  const [data, setData] = useState<DuplicateType[]>([]);
 
   async function handleConfirmPayment(id: string) {
     
@@ -73,8 +70,6 @@ export default function Expenses() {
   };
 
   const filteredData = data.filter((item: DuplicateType) => {
-    const matchesStatus =
-      !filters.status || item.status === filters.status;
 
     const matchesDate = (() => {
       if (!filters.date) return true;
@@ -93,7 +88,7 @@ export default function Expenses() {
       return due.toISOString().slice(0, 10) === filters.date;
     })();
 
-    return matchesStatus && matchesDate;
+    return matchesDate;
   });
 
   const totalValue = filteredData
@@ -126,11 +121,9 @@ export default function Expenses() {
 
     const end = new Date(now.getTime() + 24 * 60 * 60 * 1000);
 
-    const isPendingOrDelayed =
-      item.status === 'pending' || item.status === 'delayed';
 
     return (
-      isPendingOrDelayed &&
+
       due.getTime() >= start.getTime() &&
       due.getTime() <= end.getTime()
     );

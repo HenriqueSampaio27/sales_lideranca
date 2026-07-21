@@ -4,6 +4,21 @@ import fotoPadrao from '../assets/padrao.jpeg';
 import { MOCK_PRODUCTS } from '../constants';
 import { baseUrl } from "../services/AuthService"
 
+interface Product {
+  id: string;
+  product_name: string;
+  barcode: string;
+  sale_price: number;
+  price_cost: number;
+  stock: number;
+  unit: string;
+  mark: string;
+  sku: string;
+  discount: string;
+  minStock: number;
+  active: boolean;
+}
+
 const ProductRegistration: React.FC = () => {
 
   const topRef = useRef<HTMLDivElement>(null);
@@ -59,7 +74,7 @@ const ProductRegistration: React.FC = () => {
       if (!response.ok) {
         throw new Error("Erro ao buscar clientes");
       }
-      const data = await response.json();
+      const data: Product[] = await response.json();
       const sortedData = data.sort((a, b) =>
         a.product_name.localeCompare(b.product_name, "pt-BR", { sensitivity: "base" })
       );
@@ -156,7 +171,11 @@ const ProductRegistration: React.FC = () => {
       console.error("Erro detalhado:", error);
 
     // 👇 MOSTRA ERRO REAL
-      alert(error.message || "Erro ao cadastrar produto");
+        if (error instanceof Error) {
+          alert(error.message);
+        } else {
+          alert("Erro desconhecido");
+        }
     }
   };
 

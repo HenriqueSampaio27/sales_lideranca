@@ -5,15 +5,71 @@ import { PendingAccountModal } from './PendentModal';
 import { baseUrl } from "../services/AuthService"
 import { handleLogin } from '@/services/Authentication';
 
+interface Product {
+  id: string;
+  product_name: string;
+  barcode: string;
+  sale_price: number;
+  price_cost: number;
+  stock: number;
+  unit: string;
+  mark: string;
+  sku: string;
+  discount: string;
+  minStock: number;
+  active: boolean;
+}
+
+interface Client {
+  id: string;
+  name: string;
+  email: string;
+  phone: string;
+  cnpj_cpf: string;
+  logradouro: string;
+  number: string;
+  district: string;
+}
+
+interface CartItem {
+    id: string;
+    name: string;
+    sku: string;
+    qty: number;
+    unit: number;
+    pulse?: boolean;
+    maxDiscountPercent?: number;
+}
+
+interface DataCupom {
+  id: string;
+  issue_date: Date;
+  companyName: string;
+  cnpj?: string;
+  address: string;
+  cityStateZip: string;
+}
+
+interface CupomItem {
+  product_name: string;
+  quantity: number;
+  unit_price: number;
+  discount_value: number;
+}
+
+interface ItemsCupom {
+  rows: CupomItem[];
+}
+
 const POSTerminal: React.FC = () => {
   
   const navigate = useNavigate();
-  const [products, setProducts] = useState<any[]>([]);
-  const [clients, setClients] = useState<any[]>([]);
-  const [selectedClient, setSelectedClient] = useState<any>(null);
+  const [products, setProducts] = useState<Product[]>([]);
+  const [filteredProducts, setFilteredProducts] = useState<Product[]>([]);
+  const [clients, setClients] = useState<Client[]>([]);
+  const [filteredClients, setFilteredClients] = useState<Client[]>([]);
+  const [selectedClient, setSelectedClient] = useState<Client | null>(null);
   const [searchProduct, setSearchProduct] = useState("");
-  const [filteredProducts, setFilteredProducts] = useState<any[]>([]);
-  const [filteredClients, setFilteredClients] = useState<any[]>([]);
   const [searchClient, setSearchClient] = useState("");
   const [isProductModalOpen, setIsProductModalOpen] = useState(false);
   const [isClientModalOpen, setIsClientModalOpen] = useState(false);
@@ -21,16 +77,17 @@ const POSTerminal: React.FC = () => {
   const [editingIndex, setEditingIndex] = useState<number | null>(null);
   const [tempQty, setTempQty] = useState("");
   const [currentTime, setCurrentTime] = useState("");
-  const [cart, setCart] = useState([]);
-  const [cartCupom, setCartCupom] = useState([]);
+  const [cart, setCart] = useState<CartItem[]>([]);
+  const [cartCupom, setCartCupom] = useState<CartItem[]>([]);
   const [isPaymentModalOpen, setIsPaymentModalOpen] = useState(false);
   const [discount, setDiscount] = useState(0);
   const [isDiscountModalOpen, setIsDiscountModalOpen] = useState(false);
+  const [discountType, setDiscountType] = useState<"percent" | "value">("percent");
   const [discountInput, setDiscountInput] = useState(""); 
   const [isSaving, setIsSaving] = useState(false);
   const [saleCompleted, setSaleCompleted] = useState(false);
   const [isQuoteMode, setIsQuoteMode] = useState(false);
-  const [clientId, setClientId] = useState<any[]>([])
+  const [clientId, setClientId] = useState<string | null>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const modalInputRef = useRef<HTMLInputElement>(null);
   const [payments, setPayments] = useState<
@@ -66,14 +123,16 @@ const POSTerminal: React.FC = () => {
 
   const fetchProducts = async () => {
     const res = await fetch(`${base}/product`);
-    const data = await res.json();
-    const activeProducts = data.filter((p) => p.active === true);
-      const sorted = activeProducts.sort((a, b) =>
+    const data: Product[] = await res.json();
+
+    const activeProducts = data.filter((p) => p.active);
+
+    const sorted = activeProducts.sort((a, b) =>
       a.product_name.localeCompare(b.product_name)
     );
 
     setProducts(sorted);
-    setFilteredProducts(sorted);  
+    setFilteredProducts(sorted);
   };
 
   const searchProductByBarcode = async (barcode: string) => {
@@ -127,7 +186,7 @@ const POSTerminal: React.FC = () => {
       prev.map((item) => {
         const finalPercent = Math.min(
           operatorPercent,
-          item.maxDiscountPercent
+          item.maxDiscountPercent ?? 0
         );
 
         return {
@@ -138,11 +197,47 @@ const POSTerminal: React.FC = () => {
     );
   };
 
+  const applyGlobalDiscountValue = (discountValue: number) => {
+    if (discountValue <= 0) return;
+
+    const total = cart.reduce(
+      (acc, item) => acc + item.unit * item.qty,
+      0
+    );
+
+    if (total <= 0) return;
+
+    setCart((prev) =>
+      prev.map((item) => {
+        const subtotal = item.unit * item.qty;
+
+        // porcentagem que este item representa da venda
+        const proportion = subtotal / total;
+
+        // valor do desconto para este item
+        const itemDiscount = discountValue * proportion;
+
+        // converte para %
+        const percent = (itemDiscount / subtotal) * 100;
+
+        return {
+          ...item,
+          appliedDiscountPercent: Math.min(
+            percent,
+            item.maxDiscountPercent ?? 0
+          ),
+        };
+      })
+    );
+  };
+
   const handleConfirmDiscount = () => {
     const percent = Number(discountInput);
 
-    if (!isNaN(percent) && percent >= 0) {
-      applyGlobalDiscount(percent);
+    if ((discountType === "percent") && !isNaN(percent) && percent >= 0) {
+      applyGlobalDiscount(Number(percent));
+    }else {
+      applyGlobalDiscountValue(Number(percent));
     }
 
     setDiscountInput("");
@@ -295,7 +390,11 @@ const POSTerminal: React.FC = () => {
 
   };
 
-  function gerarCupomTermicoHTML(data, client, items) {
+  function gerarCupomTermicoHTML(
+  data: DataCupom,
+  client: Client | null,
+  items: ItemsCupom
+) {
     console.log(client)
     
     const totalItems = items.rows.reduce((acc, item) => acc + Number(item.quantity), 0);
@@ -380,7 +479,7 @@ const POSTerminal: React.FC = () => {
 
   <div class="line"></div>
   
-  ${client.length != 0 ? `<div class="left small">
+  ${client !== null ? `<div class="left small">
     Nome: ${client?.name || ""}
   </div>
 
@@ -467,9 +566,7 @@ const POSTerminal: React.FC = () => {
       return;
     }
 
-    const client = clientId || null;
-    console.log("no outro local: ", clientId)
-    console.log("no outro local: ", client)
+    const client = selectedClient
     // 🔹 Dados do cabeçalho (empresa / venda)
     const data = {
       id: invoiceID || "SEM_ID",
@@ -530,7 +627,7 @@ const POSTerminal: React.FC = () => {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
-            email: selectedClient.email
+            email: selectedClient?.email
           }),
         }
       );
@@ -1117,7 +1214,6 @@ const POSTerminal: React.FC = () => {
                 <div
                   key={client.id}
                   onClick={() => {
-                    setClientId(client)
                     setSelectedClient(client);
                     setIsClientModalOpen(false);
                   }}
@@ -1165,32 +1261,53 @@ const POSTerminal: React.FC = () => {
   
     {isDiscountModalOpen && (
       <div className="fixed inset-0 bg-black/80 flex items-center justify-center z-50">
-        <div className="bg-black border border-primary w-[400px] rounded-xl p-6 shadow-lg">
+        <div className="bg-black border border-primary w-[450px] rounded-xl p-6 shadow-lg">
 
           <h2 className="text-primary text-xl font-mono mb-6">
-            Desconto Global (%)
+            Desconto Global
           </h2>
 
-          <input
-            type="number"
-            autoFocus
-            value={discountInput}
-            onChange={(e) => setDiscountInput(e.target.value)}
-            className="w-full bg-black border border-primary text-primary p-3 rounded-lg text-xl font-mono outline-none"
-            placeholder="Digite o percentual"
-            onKeyDown={(e) => {
-              if (e.key === "Enter") handleConfirmDiscount();
-              if (e.key === "Escape") setIsDiscountModalOpen(false);
-            }}
-          />
+          {/* Tipo de desconto */}
+          <div className="flex gap-4 mb-6">
+            <button
+              onClick={() => setDiscountType("percent")}
+              className={`flex-1 p-3 rounded-lg border font-bold transition ${
+                discountType === "percent"
+                  ? "bg-primary text-black border-primary"
+                  : "border-primary text-primary"
+              }`}
+            >
+              %
+              <br />
+              Porcentagem
+            </button>
 
+            <button
+              onClick={() => setDiscountType("value")}
+              className={`flex-1 p-3 rounded-lg border font-bold transition ${
+                discountType === "value"
+                  ? "bg-primary text-black border-primary"
+                  : "border-primary text-primary"
+              }`}
+            >
+              R$
+              <br />
+              Valor
+            </button>
+          </div>
+
+          {/* Campo */}
           <input
             type="number"
             autoFocus
             value={discountInput}
             onChange={(e) => setDiscountInput(e.target.value)}
             className="w-full bg-black border border-primary text-primary p-3 rounded-lg text-xl font-mono outline-none"
-            placeholder="Digite o percentual"
+            placeholder={
+              discountType === "percent"
+                ? "Digite a porcentagem"
+                : "Digite o valor"
+            }
             onKeyDown={(e) => {
               if (e.key === "Enter") handleConfirmDiscount();
               if (e.key === "Escape") setIsDiscountModalOpen(false);
@@ -1199,10 +1316,13 @@ const POSTerminal: React.FC = () => {
 
           <div className="flex justify-end gap-4 mt-6">
             <button
-              onClick={() => {setIsDiscountModalOpen(false), clearGlobalDiscount()}}
+              onClick={() => {
+                setIsDiscountModalOpen(false);
+                clearGlobalDiscount();
+              }}
               className="px-4 py-2 border border-red-500 text-red-500 rounded-lg"
             >
-              Cancelar Desconto
+              Cancelar
             </button>
 
             <button
@@ -1212,6 +1332,7 @@ const POSTerminal: React.FC = () => {
               Aplicar
             </button>
           </div>
+
         </div>
       </div>
     )}

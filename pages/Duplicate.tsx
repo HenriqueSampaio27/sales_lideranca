@@ -33,7 +33,7 @@ export default function Duplicate() {
     status: '',
     date: null
   });
-  const [data, setData] = useState([]);
+  const [data, setData] = useState<DuplicateType[]>([]);
 
   async function handleConfirmPayment(id: string) {
     try {
