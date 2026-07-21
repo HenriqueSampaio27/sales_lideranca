@@ -26,6 +26,16 @@ const StockManagement: React.FC = () => {
     checkStockStatus(products);
   }, [products]);
 
+  const handleBackup = async () => {
+    try {
+      setLoadingBackup(true);
+
+      window.open(`${base}/backup`, "_blank");
+
+    } finally {
+      setLoadingBackup(false);
+    }
+  };
   const toggleActive = async (prod: any) => {
     try {
       const updated = { ...prod, active: !prod.active };
@@ -472,7 +482,7 @@ const StockManagement: React.FC = () => {
         </div>
         <div className="flex gap-4">
             <motion.button 
-
+              onClick={handleBackup}
               whileHover={{ scale: 1.05, y: -2 }}
               whileTap={{ scale: 0.95 }}
               className="bg-surface-dark/80 backdrop-blur-md border border-border-dark p-4 rounded-full shadow-2xl flex items-center gap-3 group hover:border-primary/50 transition-all"

@@ -61,23 +61,25 @@ app.use("/uploads", express.static("uploads"));
 
 const fs = require('fs');
 
-app.get('/backup', async (req, res) => {
-  const fileName = `backup-${Date.now()}.sql`;
-  const dir = path.resolve('./backups');
+app.get("/backup", (req, res) => {
+  const backupDir = path.join(__dirname, "backups");
 
-  // cria pasta se não existir
-  if (!fs.existsSync(dir)) {
-    fs.mkdirSync(dir);
+  if (!fs.existsSync(backupDir)) {
+    fs.mkdirSync(backupDir);
   }
 
-  const filePath = path.join(dir, fileName);
+  const fileName = `backup-${Date.now()}.sql`;
+  const filePath = path.join(backupDir, fileName);
 
-  const command = `pg_dump ${process.env.DATABASE_URL} -f "${filePath}"`;
+  const command = `"C:\\Program Files\\PostgreSQL\\18\\bin\\pg_dump.exe" -h 10.0.0.148 -p 5432 -U postgres sales_lider -f "${filePath}"`;
 
-  exec(command, (error) => {
+  exec(command, (error, stdout, stderr) => {
     if (error) {
-      console.error(error);
-      return res.status(500).json({ error: 'Erro ao gerar backup' });
+      console.error(stderr);
+      return res.status(500).json({
+        error: "Erro ao gerar backup",
+        details: stderr,
+      });
     }
 
     res.download(filePath);
