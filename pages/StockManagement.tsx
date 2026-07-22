@@ -30,7 +30,12 @@ const StockManagement: React.FC = () => {
     try {
       setLoadingBackup(true);
 
-      window.open(`${base}/backup`, "_blank");
+      const a = document.createElement("a");
+      a.href = `${base}/backup`;
+      a.download = "";
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
 
     } finally {
       setLoadingBackup(false);

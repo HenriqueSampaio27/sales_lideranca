@@ -26,7 +26,7 @@ app.use(cors({
 
     if (
       origin.startsWith('http://10.0.0.') ||
-      origin === 'http://localhost:3000' ||
+      origin === 'http://localhost' ||
       origin === 'https://henriquesampaio27.github.io'
     ) {
       callback(null, true);
@@ -90,28 +90,17 @@ app.get("/backup", async (req, res) => {
           error: "Erro ao gerar backup",
         });
       }
+      console.log("Entrando no download...");
+      res.download(filePath, fileName, (err) => {
+        console.log("Callback download");
 
-      res.sendFile(filePath, (err) => {
         if (err) {
-          console.error(err);
+            console.log("ERRO:");
+            console.log(err);
         } else {
-          console.log("Arquivo enviado!");
+            console.log("Download concluído");
         }
       });
-
-
-      //res.download(filePath, fileName, (err) => {
-      //  if (err) {
-      //    console.error(err);
-      //  }
-
-        // Remove o arquivo após o download
-        //fs.unlink(filePath, (unlinkErr) => {
-        //  if (unlinkErr) {
-        //    console.error("Erro ao remover backup temporário:", unlinkErr);
-        //  }
-        //});
-      //});
     }
   );
 });
