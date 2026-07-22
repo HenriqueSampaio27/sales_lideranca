@@ -73,7 +73,7 @@ app.get("/backup", async (req, res) => {
   const filePath = path.join(dir, fileName);
 
   // Comando do pg_dump
-  const command = `pg_dump -h 10.0.0.148 -p 5432 -U postgres sales_lider -f "${filePath}"`;
+  const command = `"C:\\Program Files\\PostgreSQL\\18\\bin\\pg_dump.exe" -h 10.0.0.148 -p 5432 -U postgres sales_lider -f "${filePath}"`;
 
   exec(
     command,
@@ -91,18 +91,27 @@ app.get("/backup", async (req, res) => {
         });
       }
 
-      res.download(filePath, fileName, (err) => {
+      res.sendFile(filePath, (err) => {
         if (err) {
           console.error(err);
+        } else {
+          console.log("Arquivo enviado!");
         }
+      });
+
+
+      //res.download(filePath, fileName, (err) => {
+      //  if (err) {
+      //    console.error(err);
+      //  }
 
         // Remove o arquivo após o download
-        fs.unlink(filePath, (unlinkErr) => {
-          if (unlinkErr) {
-            console.error("Erro ao remover backup temporário:", unlinkErr);
-          }
-        });
-      });
+        //fs.unlink(filePath, (unlinkErr) => {
+        //  if (unlinkErr) {
+        //    console.error("Erro ao remover backup temporário:", unlinkErr);
+        //  }
+        //});
+      //});
     }
   );
 });

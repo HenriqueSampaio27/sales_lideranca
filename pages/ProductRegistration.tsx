@@ -444,9 +444,9 @@ const ProductRegistration: React.FC = () => {
               <thead>
                 <tr className="bg-black/40 text-slate-600 text-[10px] font-black uppercase tracking-[0.2em]">
                   <th className="px-8 py-5">Produto</th>
-                  <th className="px-8 py-5">SKU</th>
                   <th className="px-8 py-5">Marca</th>
                   <th className="px-8 py-5">Preço</th>
+                  <th className="px-8 py-5">Qnt</th>
                   <th className="px-8 py-5">Status</th>
                   <th className="px-8 py-5 text-right">Ações</th>
                 </tr>
@@ -469,13 +469,13 @@ const ProductRegistration: React.FC = () => {
                             <span className="text-sm font-black text-white uppercase group-hover:text-primary transition-colors">{prod.product_name}</span>
                           </div>
                         </td>
-                        <td className="px-8 py-5 text-xs font-mono font-bold text-slate-500">{prod.sku}</td>
                         <td className="px-8 py-5">
                           <span className="px-3 py-1.5 bg-background-dark border border-border-dark rounded-lg text-[10px] font-black uppercase tracking-widest text-slate-400">
                             {prod.mark}
                           </span>
                         </td>
                         <td className="px-6 py-5 text-sm font-black text-white">R$ {formatMoney(Number(prod.sale_price))}</td>  
+                        <td className="px-6 py-5 text-sm font-black text-white">{Number(prod.stock)}</td>  
                             {prod.active == true ?<td className="px-6 py-5">
                               <span className="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-emerald-500">
                                 ATIVO
