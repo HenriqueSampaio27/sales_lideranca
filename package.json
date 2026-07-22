@@ -8,7 +8,7 @@
     "dev": "vite",
     "start": "node Server.cjs",
     "build": "vite build",
-    "preview": "vite preview",
+    "preview": "vite preview --host 0.0.0.0 --port 4173",
     "predeploy": "npm run build",
     "deploy": "gh-pages -d dist"
   },
