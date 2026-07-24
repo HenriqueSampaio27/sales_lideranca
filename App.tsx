@@ -1,7 +1,7 @@
 import { HashRouter, Routes, Route, Navigate, useNavigate } from "react-router-dom";
-import Login from "./pages/Login";
-import Layout from "./components/Layout";
-import PrivateRoute from "./components/PrivateRoute";
+import Login from "./src/pages/Login";
+import Layout from "./src/components/Layout";
+import PrivateRoute from "./src/components/PrivateRoute";
 import { appRoutes } from "./routes/routes";
 import { ComponentType } from "react";
 
