@@ -22,8 +22,8 @@ export const sidebarColors = {
   activeIcon: "#FFFFFF",
 
   // Header Brand Logo Badge
-  badgeBg: "#FEF3C7",
-  badgeBorder: "#FDE68A",
+  badgeBg: "#FFFFFF",
+  badgeBorder: "#FFFFFF",
   badgeIcon: "#B45309",
 
   // User Profile Footer Card

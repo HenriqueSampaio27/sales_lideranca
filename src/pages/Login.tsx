@@ -1,104 +1,194 @@
-
-import React from 'react';
-import { useState } from 'react';
-import { handleLogin } from '@/src/services/Authentication';
-import { useNavigate } from 'react-router-dom';
-import { baseUrl } from "@/src/services/AuthService"
+import React, { useState } from "react";
+import { handleLogin } from "../services/Authentication";
+import { useNavigate } from "react-router-dom";
+import { sidebarColors } from "../theme";
 
 interface LoginProps {
-  onLogin: () => void;
+  onLogin?: () => void;
 }
 
-const Login: React.FC<LoginProps> = ({ onLogin }) => {
+export const Login: React.FC<LoginProps> = ({ onLogin }) => {
   const navigate = useNavigate();
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
-  const base = baseUrl
+  const [loading, setLoading] = useState(false);
 
   const onLoginClick = async () => {
+    setLoading(true);
     try {
-      // Chama a função externa passando os dados
       const result = await handleLogin(username, password);
-      
-      if (result) {
 
-        onLogin(); // Notifica o App.tsx (se necessário)
-        
-        // Redireciona para a rota desejada (ex: /vendas ou /dashboard)
-        navigate('/pos'); 
+      if (result) {
+        onLogin?.();
+        navigate("/pos");
       }
-    } catch (error) {
+    } catch {
       alert("Erro ao entrar: Verifique usuário e senha.");
+    } finally {
+      setLoading(false);
     }
   };
 
   return (
-    <div className="min-h-screen bg-background-dark flex items-center justify-center p-6 relative overflow-hidden">
-      {/* Background patterns */}
-      <div className="absolute top-0 right-0 p-40 opacity-[0.02] pointer-events-none rotate-12">
-        <span className="material-symbols-outlined text-[600px]">storefront</span>
+    <div
+      style={{
+        backgroundColor: "#F8FAFC",
+        color: sidebarColors.textPrimary,
+      }}
+      className="min-h-screen flex items-center justify-center p-6 relative overflow-hidden font-sans select-none"
+    >
+      {/* Background watermark pattern */}
+      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 p-40 opacity-[0.03] pointer-events-none rotate-12">
+        <span className="material-symbols-outlined text-[600px] text-slate-800">
+          storefront
+        </span>
       </div>
-      
-      <div className="w-full max-w-md bg-surface-dark border border-border-dark rounded-[2.5rem] p-12 shadow-2xl relative z-10 animate-in fade-in zoom-in-95 duration-700">
-        <div className="flex flex-col items-center mb-10">
-          <div className="size-20 bg-primary rounded-3xl flex items-center justify-center text-background-dark shadow-2xl shadow-primary/20 mb-6 group">
-            <span className="material-symbols-outlined text-5xl font-black group-hover:scale-110 transition-transform">lock</span>
+
+      <div
+        style={{
+          backgroundColor: "#FFFFFF",
+          borderColor: "#E2E8F0",
+        }}
+        className="w-full max-w-md border rounded-3xl p-10 shadow-xl relative z-10 animate-in fade-in zoom-in-95 duration-500"
+      >
+        {/* LOGO & TITLE */}
+        <div className="flex flex-col items-center mb-8 text-center">
+          <div
+            style={{
+              backgroundColor: sidebarColors.primary,
+              borderColor: sidebarColors.primary,
+              color: sidebarColors.badgeBorder,
+            }}
+            className="w-16 h-16 rounded-2xl border flex items-center justify-center shadow-xs mb-5 group"
+          >
+            <span className="material-symbols-outlined text-3xl font-bold group-hover:scale-110 transition-transform duration-300">
+              lock
+            </span>
           </div>
-          <h1 className="text-2xl font-black text-white tracking-tighter uppercase italic">
-            LIDERANÇA <span className="text-primary">CONSTRUÇÕES</span>
+
+          <h1
+            style={{ color: sidebarColors.textPrimary }}
+            className="text-2xl font-black uppercase tracking-tight leading-tight"
+          >
+            Liderança <span style={{ color: sidebarColors.primary }}>Construções</span>
           </h1>
-          <p className="text-slate-500 text-xs font-bold uppercase tracking-[0.3em] mt-2 italic">ERP ENTERPRISE PLANNING</p>
+          <p
+            style={{ color: sidebarColors.textSecondary }}
+            className="text-[11px] font-bold uppercase tracking-widest mt-1.5"
+          >
+            Sistema de Gestão ERP
+          </p>
         </div>
 
-        <form onSubmit={(e) => { e.preventDefault(); onLogin(); }} className="space-y-6">
-          <div className="space-y-2 group">
-            <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest group-focus-within:text-primary transition-colors ml-1">Username / ID</label>
+        {/* FORM */}
+        <form
+          onSubmit={(e) => {
+            e.preventDefault();
+            onLoginClick();
+          }}
+          className="space-y-5"
+        >
+          <div className="space-y-1.5 group">
+            <label
+              style={{ color: sidebarColors.textSecondary }}
+              className="text-[11px] font-black uppercase tracking-wider ml-1 group-focus-within:text-[#FFFFFF] transition-colors"
+            >
+              Usuário / ID
+            </label>
             <div className="relative">
-              <span className="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-slate-600">person</span>
-              <input 
+              <span
+                style={{ color: sidebarColors.textMuted }}
+                className="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-xl"
+              >
+                person
+              </span>
+              <input
                 onChange={(e) => setUsername(e.target.value)}
-                type="text" 
-                defaultValue=""
-                className="w-full bg-background-dark border-border-dark text-white rounded-2xl py-4 pl-12 pr-6 outline-none focus:ring-2 focus:ring-primary focus:border-primary transition-all font-bold" 
+                type="text"
+                placeholder="Informe seu usuário"
+                style={{
+                  backgroundColor: "#F8FAFC",
+                  borderColor: "#E2E8F0",
+                  color: sidebarColors.textPrimary,
+                }}
+                className="w-full border rounded-xl py-3.5 pl-12 pr-4 text-sm font-semibold outline-none focus:border-[#FFFFFF] focus:bg-white focus:ring-2 focus:ring-[#FEF3C7] transition-all"
               />
             </div>
           </div>
 
-          <div className="space-y-2 group">
-            <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest group-focus-within:text-primary transition-colors ml-1">Password</label>
+          <div className="space-y-1.5 group">
+            <label
+              style={{ color: sidebarColors.textSecondary }}
+              className="text-[11px] font-black uppercase tracking-wider ml-1 group-focus-within:text-[#FF0000] transition-colors"
+            >
+              Senha
+            </label>
             <div className="relative">
-              <span className="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-slate-600">key</span>
-              <input 
+              <span
+                style={{ color: sidebarColors.textMuted }}
+                className="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-xl"
+              >
+                key
+              </span>
+              <input
                 onChange={(e) => setPassword(e.target.value)}
-                type="password" 
-                defaultValue=""
-                className="w-full bg-background-dark border-border-dark text-white rounded-2xl py-4 pl-12 pr-6 outline-none focus:ring-2 focus:ring-primary focus:border-primary transition-all font-bold" 
+                type="password"
+                placeholder="••••••••"
+                style={{
+                  backgroundColor: "#F8FAFC",
+                  borderColor: "#E2E8F0",
+                  color: sidebarColors.textPrimary,
+                }}
+                className="w-full border rounded-xl py-3.5 pl-12 pr-4 text-sm font-semibold outline-none focus:border-[#FF0000] focus:bg-white focus:ring-2 focus:ring-[#FEF3C7] transition-all"
               />
             </div>
           </div>
 
-          <div className="flex items-center justify-between text-[10px] font-black uppercase tracking-widest px-1">
-            <label className="flex items-center gap-2 text-slate-500 cursor-pointer hover:text-white transition-colors">
-              <input type="checkbox" className="accent-primary rounded" defaultChecked /> Lembrar Acesso
+          <div className="flex items-center justify-between text-xs font-bold px-1 py-1">
+            <label
+              style={{ color: sidebarColors.textSecondary }}
+              className="flex items-center gap-2 cursor-pointer hover:text-[#0F172A] transition-colors"
+            >
+              <input
+                type="checkbox"
+                className="accent-[#FF0000] rounded w-4 h-4"
+                defaultChecked
+              />
+              <span>Lembrar meu acesso</span>
             </label>
           </div>
 
-          <button 
-            type="button"
-            onClick={onLoginClick}
-            className="w-full bg-primary text-background-dark py-5 rounded-2xl font-black text-lg uppercase tracking-widest shadow-xl shadow-primary/10 hover:scale-[1.02] active:scale-95 transition-all mt-4"
+          <button
+            type="submit"
+            disabled={loading}
+            style={{
+              backgroundColor: sidebarColors.primary,
+              color: "#FFFFFF",
+            }}
+            className="w-full py-4 rounded-xl font-black text-sm uppercase tracking-wider shadow-md hover:bg-[#B45210] active:scale-[0.99] transition-all cursor-pointer mt-2 flex items-center justify-center gap-2"
           >
-            Acessar Sistema
+            {loading ? (
+              <span>Acessando...</span>
+            ) : (
+              <>
+                <span>Acessar Sistema</span>
+                <span className="material-symbols-outlined text-lg">arrow_forward</span>
+              </>
+            )}
           </button>
         </form>
 
-        <div className="mt-12 pt-8 border-t border-border-dark text-center">
-          <p className="text-[10px] text-slate-600 font-black uppercase tracking-widest">Acesso Restrito a Colaboradores</p>
-          <div className="flex justify-center gap-4 mt-4">
-             <div className="size-1.5 rounded-full bg-slate-800"></div>
-             <div className="size-1.5 rounded-full bg-slate-800"></div>
-             <div className="size-1.5 rounded-full bg-slate-800"></div>
-          </div>
+        {/* FOOTER */}
+        <div
+          style={{ borderColor: "#E2E8F0" }}
+          className="mt-8 pt-6 border-t text-center"
+        >
+          <p
+            style={{ color: sidebarColors.textSecondary }}
+            className="text-[11px] font-bold uppercase tracking-wider"
+          >
+            Acesso Restrito a Colaboradores
+          </p>
         </div>
       </div>
     </div>
@@ -106,3 +196,4 @@ const Login: React.FC<LoginProps> = ({ onLogin }) => {
 };
 
 export default Login;
+
