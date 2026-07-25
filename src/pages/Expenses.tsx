@@ -5,7 +5,6 @@ import { motion } from 'motion/react';
 import ExpensesModal from '../components/ExpensesModal';
 import Filters from '../components/Filters';
 import { baseUrl } from '@/src/services/AuthService';
-import DuplicateTable from '../components/DuplicateTable';
 import ExpensesTable from '../components/ExpensesTable';
 
 // 🔹 TIPOS
