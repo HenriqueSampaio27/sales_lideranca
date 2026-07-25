@@ -2,7 +2,7 @@ import { HashRouter, Routes, Route, Navigate, useNavigate } from "react-router-d
 import Login from "./src/pages/Login";
 import Layout from "./src/layouts/Layout";
 import PrivateRoute from "./src/routes/PrivateRoute";
-import { appRoutes } from "./routes/routes";
+import { appRoutes } from "./src/routes/routes";
 import { ComponentType } from "react";
 
 

@@ -1,12 +1,12 @@
-import Dashboard from "../src/pages/Dashboard";
-import StockManagement from "../src/pages/StockManagement";
-import ProductRegistration from "../src/pages/ProductRegistration";
-import ClientManagement from "../src/pages/ClientManagement";
-import Financial from "../src/pages/FinanceManagement";
-import POSTerminal from "../src/pages/POSTerminal";
+import Dashboard from "../pages/Dashboard";
+import StockManagement from "../pages/StockManagement";
+import ProductRegistration from "../pages/ProductRegistration";
+import ClientManagement from "../pages/ClientManagement";
+import Financial from "../pages/FinanceManagement";
+import POSTerminal from "../pages/POSTerminal";
 import { ComponentType } from "react";
-import Duplicate from "../src/pages/Duplicate";
-import Expenses from "../src/pages/Expenses";
+import Duplicate from "../pages/Duplicate";
+import Expenses from "../pages/Expenses";
 
 type AppRoute = {
   path: string;
