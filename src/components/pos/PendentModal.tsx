@@ -91,7 +91,7 @@ export function PendingAccountModal({
           borderRadius: borderRadius["2xl"],
           boxShadow: shadows.xl,
         }}
-        className="w-full max-w-lg border overflow-hidden animate-in zoom-in-95 duration-200"
+        className="w-full max-w-lg border animate-in zoom-in-95 duration-200"
       >
         {/* HEADER */}
         <div
@@ -232,7 +232,14 @@ export function PendingAccountModal({
               </div>
 
               {showCalendar && (
-                <div className="absolute z-10 top-full mt-2 left-0 right-0 shadow-2xl">
+                <div
+                  className="fixed z-[9999]  w-full max-w-lg"
+                  style={{
+                    top: "50%",
+                    left: "50%",
+                    transform: "translate(-50%, -50%)",
+                  }}
+                >
                   <Calendar
                     onSelectDate={handleCalendarSelect}
                     selectedDate={paymentDate}
