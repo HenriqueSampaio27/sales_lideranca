@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { Page } from '@/types';
+import { Page } from '../types/pages.ts';
 import { NavLink } from 'react-router-dom';
 
 interface SidebarProps {

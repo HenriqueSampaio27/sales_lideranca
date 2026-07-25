@@ -1,5 +1,6 @@
 import { baseUrl } from "./AuthService";
 import { Client, ClientFormData, ClientResponse } from "../types/client";
+import { apiRequest } from "./apiClient";
 
 export const clientService = {
   async getClients(): Promise<Client[]> {
@@ -56,4 +57,17 @@ export const clientService = {
       throw new Error("Erro ao deletar cliente");
     }
   },
+  
 };
+
+export class ClientService {
+    static async fetchClients(): Promise<Client[]> {
+      return apiRequest<Client[]>("/clients");
+    }
+
+    static async searchClientByDocument(doc: string): Promise<Client | null> {
+      const data = await apiRequest<Client[]>("/clients");
+      const found = data.find((c) => c.cnpj_cpf === doc);
+      return found || null;
+    }
+  }

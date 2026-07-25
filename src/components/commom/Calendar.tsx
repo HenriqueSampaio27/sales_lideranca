@@ -1,16 +1,17 @@
 import React, { useState } from 'react';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
+import { colors, borderRadius, typography, shadows, animations } from '../../theme';
 
 interface CalendarProps {
   onSelectDate: (date: string) => void;
+  selectedDate?: string | null;
 }
 
-export const Calendar: React.FC<CalendarProps> = ({ onSelectDate }) => {
+export const Calendar: React.FC<CalendarProps> = ({ onSelectDate, selectedDate }) => {
   const [currentDate, setCurrentDate] = useState<Date>(new Date());
 
   const year = currentDate.getFullYear();
   const month = currentDate.getMonth();
-
   const today = new Date();
 
   const daysInMonth = new Date(year, month + 1, 0).getDate();
@@ -32,32 +33,61 @@ export const Calendar: React.FC<CalendarProps> = ({ onSelectDate }) => {
   });
 
   return (
-    <div className="bg-slate-100/80 rounded-xl p-4 text-center border border-slate-200">
+    <div 
+      className="p-4 text-center border"
+      style={{
+        backgroundColor: colors.cardSecondary,
+        borderColor: colors.border,
+        borderRadius: borderRadius.xl,
+        fontFamily: typography.fontFamily.sans.join(', '),
+        transition: animations.transitionNormal,
+      }}
+    >
       {/* HEADER */}
       <div className="flex items-center justify-between mb-3">
         <button
           type="button"
           onClick={prevMonth}
-          className="p-1 rounded hover:bg-slate-200 text-slate-600 transition"
+          className="p-1.5 transition-colors cursor-pointer"
+          style={{ 
+            borderRadius: borderRadius.md,
+            color: colors.textSecondary,
+          }}
+          onMouseEnter={(e) => (e.currentTarget.style.color = colors.textPrimary)}
+          onMouseLeave={(e) => (e.currentTarget.style.color = colors.textSecondary)}
+          aria-label="Mês anterior"
         >
           <ChevronLeft size={16} />
         </button>
 
-        <p className="text-xs font-bold uppercase tracking-wider text-slate-700">
+        <p 
+          className="text-xs font-bold uppercase tracking-wider capitalize"
+          style={{ color: colors.textPrimary }}
+        >
           {monthName}
         </p>
 
         <button
           type="button"
           onClick={nextMonth}
-          className="p-1 rounded hover:bg-slate-200 text-slate-600 transition"
+          className="p-1.5 transition-colors cursor-pointer"
+          style={{ 
+            borderRadius: borderRadius.md,
+            color: colors.textSecondary,
+          }}
+          onMouseEnter={(e) => (e.currentTarget.style.color = colors.textPrimary)}
+          onMouseLeave={(e) => (e.currentTarget.style.color = colors.textSecondary)}
+          aria-label="Próximo mês"
         >
           <ChevronRight size={16} />
         </button>
       </div>
 
       {/* DIAS DA SEMANA */}
-      <div className="grid grid-cols-7 gap-1 text-[10px] font-bold text-slate-400 mb-1">
+      <div 
+        className="grid grid-cols-7 gap-1 text-[10px] font-bold mb-2 uppercase tracking-wider"
+        style={{ color: colors.textSecondary }}
+      >
         {['D', 'S', 'T', 'Q', 'Q', 'S', 'S'].map((d, i) => (
           <div key={i}>{d}</div>
         ))}
@@ -75,24 +105,58 @@ export const Calendar: React.FC<CalendarProps> = ({ onSelectDate }) => {
             month === today.getMonth() &&
             year === today.getFullYear();
 
-          return (
-            <div
-              key={day}
-              onClick={() => {
-                const fullDate = new Date(year, month, day)
-                  .toISOString()
-                  .slice(0, 10);
+          const formattedDayDate = new Date(year, month, day)
+            .toISOString()
+            .slice(0, 10);
 
-                onSelectDate(fullDate);
-              }}
-              className={`p-1.5 rounded-lg cursor-pointer transition text-center font-medium ${
-                isToday
-                  ? 'bg-amber-600 text-white font-bold shadow-sm'
-                  : 'text-slate-700 hover:bg-slate-200'
+          const isSelected = selectedDate === formattedDayDate;
+
+          let buttonStyle: React.CSSProperties = {
+            borderRadius: borderRadius.md,
+            transition: animations.transitionFast,
+            color: colors.textPrimary,
+          };
+
+          if (isSelected) {
+            buttonStyle = {
+              ...buttonStyle,
+              backgroundColor: colors.primary,
+              color: '#FFFFFF',
+              boxShadow: shadows.sm,
+            };
+          } else if (isToday) {
+            buttonStyle = {
+              ...buttonStyle,
+              backgroundColor: colors.primaryLight,
+              color: colors.primaryHover,
+              borderColor: colors.primary,
+              borderWidth: '1px',
+              borderStyle: 'solid',
+            };
+          }
+
+          return (
+            <button
+              key={day}
+              type="button"
+              onClick={() => onSelectDate(formattedDayDate)}
+              className={`p-1.5 cursor-pointer text-center font-medium ${
+                isSelected ? 'scale-105 font-bold' : ''
               }`}
+              style={buttonStyle}
+              onMouseEnter={(e) => {
+                if (!isSelected && !isToday) {
+                  e.currentTarget.style.backgroundColor = colors.border;
+                }
+              }}
+              onMouseLeave={(e) => {
+                if (!isSelected && !isToday) {
+                  e.currentTarget.style.backgroundColor = 'transparent';
+                }
+              }}
             >
               {day}
-            </div>
+            </button>
           );
         })}
       </div>

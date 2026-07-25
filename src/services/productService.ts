@@ -1,5 +1,6 @@
 import { baseUrl } from "./AuthService";
 import { Product, ApiResponse } from "../types/product";
+import { apiRequest } from "./apiClient";
 
 export const getProducts = async (): Promise<Product[]> => {
   const response: Response = await fetch(`${baseUrl}/product`);
@@ -93,3 +94,19 @@ export const toggleProductStatus = async (
 };
 
 export const updateProductStatus = toggleProductStatus;
+
+export class ProductService {
+  static async fetchProducts(): Promise<Product[]> {
+    const data = await apiRequest<Product[]>("/product");
+    const activeProducts = data.filter((p) => p.active);
+    return activeProducts.sort((a, b) =>
+      a.product_name.localeCompare(b.product_name)
+    );
+  }
+
+  static async searchProductByBarcode(barcode: string): Promise<Product | null> {
+    const data = await apiRequest<Product[]>("/product");
+    const found = data.find((p) => p.barcode === barcode);
+    return found || null;
+  }
+}
