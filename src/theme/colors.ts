@@ -10,8 +10,15 @@ export const colors = {
   primaryHover: "#B45309",
   primaryLight: "#FEF3C7",
   success: "#16A34A",
+  successLight: "#DCFCE7",
+  successBorder: "#86EFAC",
   error: "#DC2626",
+  errorLight: "#FEF2F2",
+  errorBorder: "#FCA5A5",
   warning: "#D97706",
+  warningLight: "#FEF3C7",
+  warningBorder: "#FDE68A",
+  overlay: "rgba(15, 23, 42, 0.4)",
 } as const;
 
 export type Colors = typeof colors;
