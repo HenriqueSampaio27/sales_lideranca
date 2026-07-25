@@ -54,7 +54,7 @@ export const POSTerminal: React.FC = () => {
         onExit={() => {
           const confirmExit = window.confirm("Deseja realmente sair do PDV?");
           if (confirmExit) {
-            navigate("/dashboard"); // ou outra rota
+            navigate("/stock"); // ou outra rota
           }
         }}
       />

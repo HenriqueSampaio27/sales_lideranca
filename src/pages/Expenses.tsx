@@ -124,8 +124,8 @@ export const Expenses: React.FC = () => {
               >
                 <Receipt size={20} />
               </span>
-              <h1 className="text-2xl md:text-3xl font-black tracking-tight" style={{ color: colors.textPrimary }}>
-                Gestão de Despesas
+              <h1 className="text-3xl md:text-4xl font-black tracking-tight uppercase italic mb-2" style={{ color: colors.textPrimary }}>
+                Gestão de <span style={{ color: colors.primary }}>Despesas</span>
               </h1>
             </div>
             <p className="text-xs font-medium" style={{ color: colors.textSecondary }}>

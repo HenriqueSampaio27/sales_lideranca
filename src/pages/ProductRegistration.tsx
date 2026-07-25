@@ -261,15 +261,8 @@ const ProductRegistration: React.FC = () => {
               </span>
               <span>Liderança Construções</span>
             </div>
-            <h1
-              style={{
-                fontSize: typography.fontSize["3xl"],
-                fontWeight: typography.fontWeight.black,
-                color: colors.textPrimary,
-              }}
-              className="tracking-tight"
-            >
-              Cadastro de <span style={{ color: colors.primary }}>Produtos</span>
+            <h1 className="text-3xl md:text-4xl font-black tracking-tight uppercase italic mb-2" style={{ color: colors.textPrimary }}>
+              cadastro de <span style={{ color: colors.primary }}>produtos</span>
             </h1>
             <p
               style={{

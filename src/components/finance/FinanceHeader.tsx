@@ -33,15 +33,8 @@ export const FinanceHeader: React.FC<FinanceHeaderProps> = ({
           <Layers style={{ color: colors.primary }} className="w-3.5 h-3.5" />
           <span>Liderança Construções</span>
         </div>
-        <h1
-          style={{
-            fontSize: typography.fontSize["3xl"],
-            fontWeight: typography.fontWeight.black,
-            color: colors.textPrimary,
-          }}
-          className="tracking-tight"
-        >
-          Gestão <span style={{ color: colors.primary }}>Financeira</span>
+        <h1 className="text-3xl md:text-4xl font-black tracking-tight uppercase italic mb-2" style={{ color: colors.textPrimary }}>
+          Banco de <span style={{ color: colors.primary }}>Notas</span>
         </h1>
         <p
           style={{

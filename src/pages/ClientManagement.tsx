@@ -191,15 +191,8 @@ const ClientManagement: React.FC = () => {
               <Layers style={{ color: colors.primary }} className="w-3.5 h-3.5" />
               <span>Liderança Construções</span>
             </div>
-            <h1
-              style={{
-                fontSize: typography.fontSize["3xl"],
-                fontWeight: typography.fontWeight.black,
-                color: colors.textPrimary,
-              }}
-              className="tracking-tight"
-            >
-              Gestão de <span style={{ color: colors.primary }}>Clientes</span>
+            <h1 className="text-3xl md:text-4xl font-black tracking-tight uppercase italic mb-2" style={{ color: colors.textPrimary }}>
+              cadastro de <span style={{ color: colors.primary }}>clientes</span>
             </h1>
             <p
               style={{

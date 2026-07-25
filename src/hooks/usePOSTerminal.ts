@@ -76,7 +76,7 @@ export function usePOSTerminal() {
           !isPaymentOpen &&
           !isPendingModalOpen
         ) {
-          navigate("/dashboard");
+          navigate("/stock");
         }
       }
     };

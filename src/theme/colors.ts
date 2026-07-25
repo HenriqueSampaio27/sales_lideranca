@@ -6,7 +6,7 @@ export const colors = {
   borderHover: "#CBD5E1",
   textPrimary: "#0F172A",
   textSecondary: "#64748B",
-  primary: "#D97706",
+  primary: "#FF0000",
   primaryHover: "#B45309",
   primaryLight: "#FEF3C7",
   success: "#16A34A",
@@ -15,9 +15,9 @@ export const colors = {
   error: "#DC2626",
   errorLight: "#FEF2F2",
   errorBorder: "#FCA5A5",
-  warning: "#D97706",
+  warning: "#FF0000",
   warningLight: "#FEF3C7",
-  warningBorder: "#FDE68A",
+  warningBorder: "#FF0",
   overlay: "rgba(15, 23, 42, 0.4)",
 } as const;
 
