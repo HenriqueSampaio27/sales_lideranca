@@ -163,10 +163,10 @@ export function useDashboard() {
 
     // Custo dos Produtos Vendidos (CPV)
     const cpv = invoiceItems.reduce((total, item) => {
-      console.log(item.price_cost)
+      console.log(item.cost_price)
       return (
         total +
-        (Number(item.price_cost) || 0) *
+        (Number(item.cost_price) || 0) *
         (Number(item.quantity) || 0)
       );
     }, 0);

@@ -25,7 +25,7 @@ export interface DashboardProduct {
 export interface DashboardInvItems {
   id?: string;
   product_name?: string;
-  price_cost?: number
+  cost_price?: number
   sales_count?: number;
   quantity: number;
 }

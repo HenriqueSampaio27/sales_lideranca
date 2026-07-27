@@ -518,7 +518,7 @@ app.get("/invoice_items", async (req, res) => {
     SELECT invoice_id,
           product_id,
           quantity,
-          price_cost
+          cost_price
     FROM invoice_items
   `);
 
