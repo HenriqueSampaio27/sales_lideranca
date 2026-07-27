@@ -513,6 +513,18 @@ app.get("/invoices", async (req, res) => {
   }
 });
 
+app.get("/invoice_items", async (req, res) => {
+  const result = await pool.query(`
+    SELECT invoice_id,
+          product_id,
+          quantity,
+          price_cost
+    FROM invoice_items
+  `);
+
+  res.json(result.rows);
+});
+
 app.get("/invoices/chart", async (req, res) => {
   const { period } = req.query;
 
