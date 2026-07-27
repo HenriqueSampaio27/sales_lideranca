@@ -41,6 +41,7 @@ export function useSale({
             unit_price_original: item.unit,
             discount_value: discountVal,
             unit_price_final: item.unit - discountVal,
+            price_cost: item.cost_price
           };
         });
 
@@ -52,6 +53,7 @@ export function useSale({
           is_paid: isPaid,
           payment_method: paymentData,
           pending_info: pendingInfo,
+
         };
 
         if(isQuoteMode){

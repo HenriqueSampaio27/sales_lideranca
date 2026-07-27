@@ -22,6 +22,14 @@ export interface DashboardProduct {
   sales_count?: number;
 }
 
+export interface DashboardInvItems {
+  id?: string;
+  product_name?: string;
+  price_cost?: number
+  sales_count?: number;
+  quantity: number;
+}
+
 export interface DashboardDuplicate {
   id: string;
   client: string;

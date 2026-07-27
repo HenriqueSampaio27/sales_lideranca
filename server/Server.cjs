@@ -404,8 +404,9 @@ app.post("/invoices", async (req, res) => {
           discount_value,
           unit_price,
           sale_type,
-          item_total)
-        VALUES ($1,$2,$3,$4,$5,$6,$7,$8)`,
+          item_total,
+          price_cost)
+        VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9)`,
         [
           invoiceId,
           item.product_id,
@@ -414,16 +415,17 @@ app.post("/invoices", async (req, res) => {
           item.discount_value,
           item.unit_price_final,
           item.sale_type,
-          itemTotal
+          itemTotal,
+          item.price_cost
         ]
       );
 
       // Atualizar estoque com proteção
       const stockUpdate = await client.query(
         `UPDATE product
-         SET stock = stock - $1
-         WHERE id = $2
-         AND stock >= $1`,
+        SET stock = stock - $1
+        WHERE id = $2
+        AND stock >= $1`,
         [item.quantity, item.product_id]
       );
 

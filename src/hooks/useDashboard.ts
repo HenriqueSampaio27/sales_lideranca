@@ -10,7 +10,8 @@ import { DashboardInvoice,
   FinancialStatusPoint,
   TopProductStockPoint,
   TopProductSalesPoint,
-  AlertItem
+  AlertItem,
+  DashboardInvItems
  } from "../types/dashboard";
 
 export type PeriodFilter = "today" | "7d" | "30d" | "6m" | "1y";
@@ -25,6 +26,7 @@ export function useDashboard() {
   const [products, setProducts] = useState<DashboardProduct[]>([]);
   const [duplicates, setDuplicates] = useState<DashboardDuplicate[]>([]);
   const [expenses, setExpenses] = useState<DashboardExpense[]>([]);
+  const [invoiceItems, setInvoiceItems] = useState<DashboardInvItems[]>([]);
   const [clientsCount, setClientsCount] = useState<number>(0);
 
   // Carregar dados
@@ -37,11 +39,12 @@ export function useDashboard() {
       const base = baseUrl;
 
       try {
-        const [invRes, prodRes, dupRes, expRes, cliRes] = await Promise.allSettled([
+        const [invRes, prodRes, dupRes, expRes, inv_items, cliRes] = await Promise.allSettled([
           fetch(`${base}/invoices`),
           fetch(`${base}/product`),
           fetch(`${base}/duplicates`),
           fetch(`${base}/expenses`),
+          fetch(`${base}/invoice_items`),
           ClientService.fetchClients(),
         ]);
 
@@ -77,12 +80,21 @@ export function useDashboard() {
           setExpenses(fallbackExpenses);
         }
 
+        //Invoices_items
+        if (inv_items.status === "fulfilled" && inv_items.value.ok) {
+          const itemsJson = await inv_items.value.json();
+          setInvoiceItems(Array.isArray(itemsJson) ? itemsJson : itemsJson.data || []);
+        } else {
+          setInvoiceItems([]);
+        }
+
         // Clients
         if (cliRes.status === "fulfilled" && Array.isArray(cliRes.value)) {
           setClientsCount(cliRes.value.length || 148);
         } else {
           setClientsCount(148);
         }
+
       } catch (err) {
         console.error("Erro ao carregar dados do Dashboard:", err);
         setError("Servidor offline. Exibindo dados integrados em modo de demonstração.");
@@ -149,15 +161,24 @@ export function useDashboard() {
       0
     );
 
-    // Custo dos Produtos Vendidos (CPV) - Estimativa de 45% do Faturamento
-    const cpv = faturamentoTotal * 0.45;
+    // Custo dos Produtos Vendidos (CPV)
+    const cpv = invoiceItems.reduce((total, item) => {
+      console.log(item.price_cost)
+      return (
+        total +
+        (Number(item.price_cost) || 0) *
+        (Number(item.quantity) || 0)
+      );
+    }, 0);
 
-    // Lucro Estimado = Faturamento Total - CPV - Despesas
-    const lucroEstimado = Math.max(0, faturamentoTotal - cpv - totalExpenses);
+    const lucroRealBruto = faturamentoTotal - cpv
+    const lucroReal = faturamentoTotal - cpv - totalExpenses;
 
     // Margem de Lucro %
     const margemLucroPct =
-      faturamentoTotal > 0 ? (lucroEstimado / faturamentoTotal) * 100 : 0;
+      faturamentoTotal > 0
+        ? (lucroReal / faturamentoTotal) * 100
+        : 0;
 
     // Estoque
     let valorEstoque = 0;
@@ -183,7 +204,8 @@ export function useDashboard() {
 
     return {
       faturamentoTotal,
-      lucroEstimado,
+      lucroReal,
+      lucroRealBruto,
       margemLucroPct,
       vendasCount,
       clientesAtivos: clientsCount,
@@ -209,7 +231,7 @@ export function useDashboard() {
       { name: "Abr", receita: 180000, custos: 81000, despesas: 41000, lucro: 58000 },
       { name: "Mai", receita: 210000, custos: 94500, despesas: 48000, lucro: 67500 },
       { name: "Jun", receita: 195000, custos: 87750, despesas: 44000, lucro: 63250 },
-      { name: "Jul", receita: kpis.faturamentoTotal, custos: kpis.cpv, despesas: kpis.totalExpenses, lucro: kpis.lucroEstimado },
+      { name: "Jul", receita: kpis.faturamentoTotal, custos: kpis.cpv, despesas: kpis.totalExpenses, lucro: kpis.lucroReal },
     ];
   }, [kpis]);
 

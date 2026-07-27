@@ -7,4 +7,5 @@ export interface CartItem {
   pulse?: boolean;
   maxDiscountPercent?: number;
   appliedDiscountPercent?: number;
+  cost_price: number;
 }

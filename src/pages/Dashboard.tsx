@@ -86,7 +86,7 @@ export const Dashboard: React.FC = () => {
           <section>
             <ExecutiveSummaryPanel
               faturamentoTotal={kpis.faturamentoTotal}
-              lucroEstimado={kpis.lucroEstimado}
+              lucroEstimado={kpis.lucroReal}
               margemLucroPct={kpis.margemLucroPct}
               pendingInvoicesValue={kpis.pendingInvoicesValue}
               duplicatesValue={kpis.duplicatesValue}
@@ -132,7 +132,7 @@ export const Dashboard: React.FC = () => {
               <KPICard
                 index={1}
                 title="Lucro Estimado"
-                value={formatCurrency(kpis.lucroEstimado)}
+                value={formatCurrency(kpis.lucroReal)}
                 subValue={`Margem Líquida: ${kpis.margemLucroPct.toFixed(1)}%`}
                 changeText="+9.8%"
                 isPositive={true}
