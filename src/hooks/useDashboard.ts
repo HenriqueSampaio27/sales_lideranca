@@ -94,7 +94,7 @@ export function useDashboard() {
         } else {
           setClientsCount(148);
         }
-
+        console.log(inv_items)
       } catch (err) {
         console.error("Erro ao carregar dados do Dashboard:", err);
         setError("Servidor offline. Exibindo dados integrados em modo de demonstração.");

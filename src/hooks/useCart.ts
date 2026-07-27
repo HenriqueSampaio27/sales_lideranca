@@ -30,6 +30,7 @@ export function useCart() {
           unit: Number(product.sale_price),
           maxDiscountPercent: Number(product.discount || 0),
           appliedDiscountPercent: 0,
+          cost_price: Number(product.price_cost)
         },
       ];
     });
