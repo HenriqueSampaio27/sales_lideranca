@@ -405,7 +405,7 @@ app.post("/invoices", async (req, res) => {
           unit_price,
           sale_type,
           item_total,
-          price_cost)
+          cost_price)
         VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9)`,
         [
           invoiceId,
@@ -416,7 +416,7 @@ app.post("/invoices", async (req, res) => {
           item.unit_price_final,
           item.sale_type,
           itemTotal,
-          item.price_cost
+          item.cost_price
         ]
       );
 
