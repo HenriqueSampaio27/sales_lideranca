@@ -5,6 +5,7 @@ import { useCart } from "./useCart";
 import { useClients } from "./useClients";
 
 export interface UseSaleParams {
+  isQuoteMode: boolean;
   cartState: ReturnType<typeof useCart>;
   clientsState: ReturnType<typeof useClients>;
   setIsPaymentOpen: (open: boolean) => void;
@@ -13,6 +14,7 @@ export interface UseSaleParams {
 }
 
 export function useSale({
+  isQuoteMode,
   cartState,
   clientsState,
   setIsPaymentOpen,
@@ -52,14 +54,19 @@ export function useSale({
           pending_info: pendingInfo,
         };
 
-        const response = await InvoiceService.createInvoice(payload);
+        if(isQuoteMode){
+          setSaleCompleted(true)
+        }else{
+          const response = await InvoiceService.createInvoice(payload);
 
-        if (response.invoice_id) {
-          setLastInvoiceId(response.invoice_id);
-          setSaleCompleted(true);
-        } else {
-          alert("Erro ao salvar venda.");
+          if (response.invoice_id) {
+            setLastInvoiceId(response.invoice_id);
+            setSaleCompleted(true);
+          } else {
+            alert("Erro ao salvar venda.");
+          }
         }
+
       } catch (err: unknown) {
         const msg = err instanceof Error ? err.message : "Erro ao salvar venda";
         alert(`Erro ao salvar venda: ${msg}`);

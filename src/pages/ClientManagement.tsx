@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { Users, Layers, Download, CheckCircle, X } from "lucide-react";
 import { motion, AnimatePresence } from "motion/react";
 import { Client, ClientFormData } from "../types/client";
-import { clientService } from "../services/clientService";
+import { clientService } from "../services/index";
 import { Button } from "../components/ui";
 import { colors, borderRadius, typography, shadows } from "../theme";
 

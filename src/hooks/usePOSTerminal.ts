@@ -26,6 +26,7 @@ export function usePOSTerminal() {
   const barcodeInputRef = useRef<HTMLInputElement>(null);
 
   const sale = useSale({
+    isQuoteMode,
     cartState,
     clientsState,
     setIsPaymentOpen,

@@ -1,6 +1,6 @@
 import { useState, useCallback } from "react";
 import { Client } from "../types";
-import { ClientService } from "../services/clientService";
+import { ClientService } from "../services/ClientService";
 
 export function useClients() {
   const [clients, setClients] = useState<Client[]>([]);

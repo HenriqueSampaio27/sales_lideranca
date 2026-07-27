@@ -1,388 +1,344 @@
-import React, { useEffect, useState } from 'react';
-import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
-import { CHART_DATA } from '@/constants';
-import { motion } from 'motion/react';
-import { 
-  LayoutDashboard, 
-  Package, 
-  ShoppingCart, 
-  Users, 
-  DollarSign, 
-  BarChart3, 
-  Terminal,
-  Search,
-  Filter,
-  Download,
-  Receipt,
-  Calendar,
-  MoreVertical,
-  ArrowRight,
-  TrendingUp,
-  TrendingDown,
-  AlertTriangle,
-  XCircle,
-  CheckCircle2,
-  FileText
-} from 'lucide-react';
-import { Form } from 'react-router-dom';
-import { baseUrl } from "@/src/services/AuthService"
+import React from "react";
+import { useDashboard, formatCurrency } from "../hooks/useDashboard";
+import { dashboardTheme } from "../theme/dashboardTheme";
+import { DashboardHeader } from "../components/dashboard/DashboardHeader";
+import { KPICard } from "../components/dashboard/KPICard";
+import { ExecutiveSummaryPanel } from "../components/dashboard/ExecutiveSummaryPanel";
+import { MonthlyFinancialChart } from "../components/dashboard/MonthlyFinancialChart";
+import { ProfitEvolutionChart } from "../components/dashboard/ProfitEvolutionChart";
+import { FinancialStatusChart } from "../components/dashboard/FinancialStatusChart";
+import { StockAnalysisChart } from "../components/dashboard/StockAnalysisChart";
+import { AlertsPanel } from "../components/dashboard/AlertsPanel";
+import { RecentSales } from "../components/dashboard/RecentSales";
 
-
-type DuplicateType = {
-  id: string;
-  client: string;
-  cnpj: string;
-  document: string;
-  due_date: string;
-  value: number;
-  status: 'pending' | 'delayed' | 'paid';
-  initials: string;
-};
-
-interface Product {
-  stock: number | string;
-  price_cost: number | string;
-  minStock: number | string;
-  active: boolean;
-}
-
-interface Expense {
-  id: number;
-  value: number;
-  // adicione outros campos se utilizar
-}
-
-interface Invoice {
-  status: string;
-  total_amount: string | number;
-}
-
-const Dashboard: React.FC = () => {
-  const [timeFilter, setTimeFilter] = useState<keyof typeof CHART_DATA>('30d');
-  const [chartData, setChartData] = useState<any[]>([]);
-  const [qntEmpty, setQntEmpty] = useState(0)
-  const [qntLow, setQntLow] = useState(0)
-  const [valueStock, setValueStock] = useState("")
-  const [totalBilled, setTotalBilled] = useState(0)
-  const [totalPaid, setTotalPaid] = useState("")
-  const [totalPedding, setTotalPedding] = useState("")
-  const [estimated, setEstimated] = useState("")
-  const [valueDuplicate, setValueDuplicate] = useState("")
-  const [expensesAdd, setExpensesAdd] = useState<Expense[]>([]);
-  const [data, setData] = useState<DuplicateType[]>([]);
-  const base = baseUrl
-
-
-  const formatCurrencyCompact = (value: number): string  => {
-  const abs = Math.abs(value)
-
-  // Até 999.999,99 → formato normal
-  if (abs < 1_000_000) {
-    return new Intl.NumberFormat("pt-BR", {
-      style: "currency",
-      currency: "BRL",
-      minimumFractionDigits: 2,
-      maximumFractionDigits: 2,
-    }).format(value)
-  }
-
-  // 1.000.000+ → milhões
-  const millions = value / 1_000_000
-
-  return `R$ ${millions.toLocaleString("pt-BR", {
-    minimumFractionDigits: 1,
-    maximumFractionDigits: 1,
-  })}M`
-  }
-
-  const fetchProducts = async () => {
-    try {
-      const response = await fetch(`${base}/product`);
-
-      if (!response.ok) {
-        throw new Error("Erro ao buscar produtos");
-      }
-
-      const data: Product[] = await response.json();
-      
-      //const subTotal =  cart.reduce((acc, item) => acc + (item.qty * item.unit), 0);
-      const value = formatCurrencyCompact(data.reduce((acc, item) => acc + (Number(item.stock) * Number(item.price_cost)), 0))
-      let stock = 0
-      let minStock = 0
-
-      data
-        .filter((item) => item.active === true)
-        .forEach((item) => {
-          const stockValue = Number(item.stock)
-          const minValue = Number(item.minStock)
-
-          if (stockValue === 0) {
-            stock += 1
-          } else if (stockValue > 0 && stockValue <= minValue) {
-            minStock += 1
-          }
-        })
-      setValueStock(value)
-      setQntEmpty(stock)
-      setQntLow(minStock)
-
-    } catch (error) {
-      console.error(error);
-    }
-  };
-
-  const getInvoiceSummary = async () => {
-    try {
-      const response = await fetch(`${base}/invoices`);
-
-      if (!response.ok) {
-        throw new Error("Erro ao buscar notas");
-      }
-
-      const data: Invoice[] = await response.json();
-      const totalSales = data.length
-      let paid = 0
-      let pedding = 0
-
-      data.map((item) => {
-        if(item.status == "PAGO" && item.total_amount != "NaN" ){
-          paid += Number(item.total_amount)
-        }
-      })
-      data.map((item) => {
-        if(item.status == "PENDENTE" && item.total_amount != "NaN" ){
-          pedding += Number(item.total_amount)
-        }
-      })
-      //const paid = formatCurrencyCompact(data.total_paid)
-      //const pedding = formatCurrencyCompact(data.total_pedding)
-      let total = (paid + pedding)
-      setTotalBilled(totalSales)
-      setTotalPaid(formatCurrencyCompact(paid))
-      setTotalPedding(formatCurrencyCompact(pedding))
-      setEstimated(formatCurrencyCompact(total))
-      
-      return data;
-    } catch (error) {
-      console.error(error);
-      return [];
-    }
-  }
-
-  const fetchChartData = async (period: string) => {
-  try {
-    const response = await fetch(
-      `${base}/invoices/chart?period=${period}`
-    );
-
-    if (!response.ok) {
-      throw new Error("Erro ao buscar gráfico");
-    }
-
-    const data = await response.json();
-
-    setChartData(
-      data.map((item: any) => ({
-        name: item.name,
-        sales: Number(item.sales)
-      }))
-    );
-
-  } catch (error) {
-    console.error(error);
-    setChartData([]);
-  }
-};  
-async function load() {
-      const res = await fetch(`${base}/duplicates`);
-      const json = await res.json();
-      setData(json);
-    }
-
-    async function loadExpenses() {
-      const res = await fetch(`${base}/expenses`);
-      const json = await res.json();
-      setExpensesAdd(json);
-    }
-
-  const totalDuplicatesValue = data
-    .filter((item: any) =>
-      item.status === "pending" || item.status === "delayed"
-    )
-    .reduce((acc: number, item: any) => {
-      const value = Number(item.value);
-      return acc + (isNaN(value) ? 0 : value);
-    }, 0);
-  const valueDuplicatex = formatCurrencyCompact(totalDuplicatesValue);
-
-  const totalExpensesValue = expensesAdd
-    .reduce((acc: number, item: any) => {
-      const value = Number(item.value);
-      return acc + (isNaN(value) ? 0 : value);
-    }, 0);
-  const valueExpenses = formatCurrencyCompact(totalExpensesValue);
-
-  const kpis = [
-    { label: 'Baixo Estoque', value: qntLow, change: 'Atenção', color: 'amber', icon: <AlertTriangle className="size-5" /> },
-    { label: 'Esgotados', value: qntEmpty, change: 'Crítico', color: 'rose', icon: <XCircle className="size-5" /> },
-    { label: 'Valor em Estoque', value: valueStock, change: '', color: 'emerald', icon: <Package className="size-5" /> },
-    { label: 'Valor Duplicatas', value: valueDuplicatex, change: '', color: 'emerald', icon: <FileText className="size-5" /> },
-    { label: 'Valor Despesas', value: valueExpenses, change: '', color: 'emerald', icon: <FileText className="size-5" /> },
-    { label: 'Total Faturado', value: totalPaid, change: '', color: 'primary', icon: <DollarSign className="size-5" /> },
-    { label: 'Total Pendência', value: totalPedding, change: '', color: 'primary', icon: <BarChart3 className="size-5" /> },
-    { label: 'Total de Vendas', value: totalBilled, change: '', color: 'primary', icon: <ShoppingCart className="size-5" /> },
-    { label: 'Venda Total', value: estimated, change: '', color: 'primary', icon: <TrendingUp className="size-5" /> },
-  ];
-
-  const getColorClasses = (color: string) => {
-    switch (color) {
-      case 'amber': return { bg: 'bg-amber-500/10', text: 'text-amber-500', border: 'border-amber-500/20' };
-      case 'rose': return { bg: 'bg-rose-500/10', text: 'text-rose-500', border: 'border-rose-500/20' };
-      case 'emerald': return { bg: 'bg-emerald-500/10', text: 'text-emerald-500', border: 'border-emerald-500/20' };
-      default: return { bg: 'bg-primary/10', text: 'text-primary', border: 'border-primary/20' };
-    }
-  };
-
-  useEffect(() => {
-    fetchProducts()
-    getInvoiceSummary()
-
-  }, [])
-
-  useEffect(() => {
-    fetchChartData(timeFilter);
-  }, [timeFilter])
-
-  useEffect(() => {
-    load();
-    loadExpenses();
-  }, []);
-
+export const Dashboard: React.FC = () => {
+  const {
+    period,
+    setPeriod,
+    loading,
+    refreshing,
+    error,
+    refreshData,
+    kpis,
+    monthlyFinancialData,
+    profitLineData,
+    financialStatusData,
+    topProductsByStockValue,
+    topProductsBySales,
+    alerts,
+    recentSales,
+  } = useDashboard();
 
   return (
-    <div className="flex min-h-screen bg-background-dark text-slate-200">
-      {/* Main Content */}
-      <main className="flex-1 overflow-y-auto custom-scrollbar">
+    <div
+      style={{
+        backgroundColor: dashboardTheme.bg,
+        color: dashboardTheme.textPrimary,
+      }}
+      className="min-h-screen p-6 space-y-8 font-sans select-none"
+    >
+      {/* ERROR NOTICE IF SERVER DISCONNECTED */}
+      {error && (
+        <div
+          style={{
+            backgroundColor: dashboardTheme.warningBg,
+            borderColor: dashboardTheme.warningBorder,
+            color: dashboardTheme.warningText,
+          }}
+          className="p-4 rounded-xl border text-xs font-bold flex items-center justify-between shadow-xs"
+        >
+          <div className="flex items-center gap-2">
+            <span className="material-symbols-outlined text-lg">info</span>
+            <span>{error}</span>
+          </div>
+          <button
+            type="button"
+            onClick={refreshData}
+            className="underline font-black cursor-pointer hover:opacity-80"
+          >
+            Tentar novamente
+          </button>
+        </div>
+      )}
 
-        <div className="p-8 space-y-8">
-          {/* KPI Grid - Row 1 (Stock Indicators - 3 items) */}
-          <section className="grid grid-cols-1 md:grid-cols-5 gap-4">
-            {kpis.slice(0, 5).map((kpi, idx) => {
-              const colors = getColorClasses(kpi.color || 'primary');
-              return (
-                <motion.div 
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: idx * 0.05 }}
-                  key={idx} 
-                  className="bg-surface-dark p-5 rounded-2xl border border-border-dark shadow-xl hover:border-primary/30 transition-all group"
-                >
-                  <div className="flex justify-between items-start mb-4">
-                    <div className={`p-2 rounded-xl ${colors.bg} ${colors.text} group-hover:scale-110 transition-transform`}>
-                      {kpi.icon}
-                    </div>
-                  
-                  </div>
-                  <p className="text-slate-500 text-[10px] font-black uppercase tracking-wider">{kpi.label}</p>
-                  <h3 className="text-xl font-black mt-1 tracking-tight text-white group-hover:text-primary transition-colors">{kpi.value}</h3>
-                </motion.div>
-              );
-            })}
+      {/* HEADER */}
+      <DashboardHeader
+        period={period}
+        onPeriodChange={setPeriod}
+        onRefresh={refreshData}
+        refreshing={refreshing}
+      />
+
+      {/* LOADING SKELETON OR CONTENT */}
+      {loading ? (
+        <div className="p-16 flex flex-col items-center justify-center space-y-4">
+          <div className="w-12 h-12 rounded-full border-4 border-[#DC2626] border-t-transparent animate-spin" />
+          <p
+            style={{ color: dashboardTheme.textSecondary }}
+            className="text-xs font-extrabold uppercase tracking-widest"
+          >
+            Sincronizando Indicadores ERP...
+          </p>
+        </div>
+      ) : (
+        <>
+          {/* EXECUTIVE SMART SUMMARY PANEL */}
+          <section>
+            <ExecutiveSummaryPanel
+              faturamentoTotal={kpis.faturamentoTotal}
+              lucroEstimado={kpis.lucroEstimado}
+              margemLucroPct={kpis.margemLucroPct}
+              pendingInvoicesValue={kpis.pendingInvoicesValue}
+              duplicatesValue={kpis.duplicatesValue}
+              totalExpenses={kpis.totalExpenses}
+              lowStockCount={kpis.lowStockCount}
+              outOfStockCount={kpis.outOfStockCount}
+              clientesAtivos={kpis.clientesAtivos}
+            />
           </section>
 
-          {/* KPI Grid - Row 2 (Financial Indicators - 4 items) */}
-          <section className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-            {kpis.slice(5).map((kpi, idx) => {
-              const colors = getColorClasses(kpi.color || 'primary');
-              return (
-                <motion.div 
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: (idx + 3) * 0.05 }}
-                  key={idx + 3} 
-                  className="bg-surface-dark p-5 rounded-2xl border border-border-dark shadow-xl hover:border-primary/30 transition-all group"
-                >
-                  <div className="flex justify-between items-start mb-4">
-                    <div className={`p-2 rounded-xl ${colors.bg} ${colors.text} group-hover:scale-110 transition-transform`}>
-                      {kpi.icon}
-                    </div>
-    
-                  </div>
-                  <p className="text-slate-500 text-[10px] font-black uppercase tracking-wider">{kpi.label}</p>
-                  <h3 className="text-xl font-black mt-1 tracking-tight text-white group-hover:text-primary transition-colors">{kpi.value}</h3>
-                </motion.div>
-              );
-            })}
+          {/* GRUPO 1: VISÃO GERAL */}
+          <section className="space-y-3">
+            <div className="flex items-center gap-2 border-b border-slate-200/80 pb-2">
+              <span
+                style={{ color: dashboardTheme.primaryRed }}
+                className="material-symbols-outlined text-xl"
+              >
+                query_stats
+              </span>
+              <h2
+                style={{ color: dashboardTheme.textPrimary }}
+                className="text-sm font-black uppercase tracking-wider"
+              >
+                Visão Geral do Negócio
+              </h2>
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+              {/* 1. FATURAMENTO TOTAL */}
+              <KPICard
+                index={0}
+                title="Faturamento Total"
+                value={formatCurrency(kpis.faturamentoTotal)}
+                changeText="+14.2%"
+                isPositive={true}
+                comparisonText="vs. mês anterior"
+                iconName="payments"
+                badgeType="primary"
+                highlightTag="Receita Bruta"
+              />
+
+              {/* 2. LUCRO ESTIMADO */}
+              <KPICard
+                index={1}
+                title="Lucro Estimado"
+                value={formatCurrency(kpis.lucroEstimado)}
+                subValue={`Margem Líquida: ${kpis.margemLucroPct.toFixed(1)}%`}
+                changeText="+9.8%"
+                isPositive={true}
+                comparisonText="Faturamento - CPV - Despesas"
+                iconName="trending_up"
+                badgeType="success"
+                highlightTag="Líquido"
+              />
+
+              {/* 3. TOTAL DE VENDAS */}
+              <KPICard
+                index={2}
+                title="Total de Vendas"
+                value={`${kpis.vendasCount} pedidos`}
+                changeText="+6.5%"
+                isPositive={true}
+                comparisonText="Pedidos concluídos no PDV"
+                iconName="shopping_bag"
+                badgeType="info"
+              />
+
+              {/* 4. CLIENTES ATIVOS */}
+              <KPICard
+                index={3}
+                title="Clientes Ativos"
+                value={`${kpis.clientesAtivos} clientes`}
+                changeText="+12 novos"
+                isPositive={true}
+                comparisonText="Base de clientes cadastrada"
+                iconName="group"
+                badgeType="slate"
+              />
+            </div>
           </section>
 
-          {/* Charts Section */}
-          <div className="grid grid-cols-1 gap-6">
-            <div className="bg-surface-dark border border-border-dark p-6 rounded-2xl shadow-xl flex flex-col">
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-10">
-                <div>
-                  <h4 className="text-white font-black uppercase tracking-tight text-lg">Tendência de Vendas</h4>
-                  <p className="text-xs text-slate-500 font-medium italic">Valor de vendas consolidado por período</p>
-                </div>
-                <div className="flex flex-wrap items-center gap-2 bg-background-dark p-1 rounded-xl border border-border-dark">
-                  {[
-                    { label: '30 Dias', value: '30d' },
-                    { label: '3 Meses', value: '3m' },
-                    { label: '6 Meses', value: '6m' },
-                    { label: '1 Ano', value: '1y' },
-                    { label: '2 Anos', value: '2y' },
-                  ].map((filter) => (
-                    <button
-                      key={filter.value}
-                      onClick={() => setTimeFilter(filter.value as any)}
-                      className={`px-3 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-tighter transition-all ${
-                        timeFilter === filter.value 
-                          ? 'bg-primary text-background-dark shadow-lg' 
-                          : 'text-slate-500 hover:text-slate-200'
-                      }`}
-                    >
-                      {filter.label}
-                    </button>
-                  ))}
-                </div>
+          {/* GRUPO 2: FINANCEIRO */}
+          <section className="space-y-4">
+            <div className="flex items-center gap-2 border-b border-slate-200/80 pb-2">
+              <span
+                style={{ color: dashboardTheme.primaryRed }}
+                className="material-symbols-outlined text-xl"
+              >
+                account_balance
+              </span>
+              <h2
+                style={{ color: dashboardTheme.textPrimary }}
+                className="text-sm font-black uppercase tracking-wider"
+              >
+                Gestão Financeira & Cobranças
+              </h2>
+            </div>
+
+            {/* 4 CARDS FINANCEIROS */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+              {/* 5. CONTAS PENDENTES */}
+              <KPICard
+                index={4}
+                title="Contas Pendentes"
+                value={formatCurrency(kpis.pendingInvoicesValue)}
+                subValue={`${kpis.pendingInvoicesCount} vendas em aberto`}
+                changeText="Aguardando"
+                isPositive={null}
+                comparisonText="Vendas realizadas não liquidadas"
+                iconName="schedule"
+                badgeType="warning"
+              />
+
+              {/* 6. DUPLICATAS EM ABERTO */}
+              <KPICard
+                index={5}
+                title="Duplicatas em Aberto"
+                value={formatCurrency(kpis.duplicatesValue)}
+                subValue={`${kpis.duplicatesCount} duplicatas | Próx: ${kpis.nextDuplicateDueDate}`}
+                changeText="Faturado"
+                isPositive={kpis.duplicatesCount > 0 ? false : true}
+                comparisonText="Contas faturadas a receber"
+                iconName="request_quote"
+                badgeType="danger"
+              />
+
+              {/* 7. DESPESAS DO PERÍODO */}
+              <KPICard
+                index={6}
+                title="Despesas do Período"
+                value={formatCurrency(kpis.totalExpenses)}
+                changeText="-3.2%"
+                isPositive={true}
+                comparisonText="Contas pagas e operacionais"
+                iconName="price_check"
+                badgeType="slate"
+              />
+
+              {/* 8. MARGEM DE LUCRO */}
+              <KPICard
+                index={7}
+                title="Margem de Lucro"
+                value={`${kpis.margemLucroPct.toFixed(1)}%`}
+                changeText="Saudável"
+                isPositive={true}
+                comparisonText="Percentual sobre receita"
+                iconName="pie_chart"
+                badgeType="success"
+                highlightTag="Rentabilidade"
+              />
+            </div>
+
+            {/* GRÁFICOS FINANCEIROS */}
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+              <div className="lg:col-span-5">
+                <MonthlyFinancialChart data={monthlyFinancialData} />
               </div>
-              <div style={{ width: '100%', height: '300px', minWidth: '0' }} className="h-96 w-full">
-                <ResponsiveContainer width="100%" height="100%">
-                  <AreaChart data={chartData}>
-                    <defs>
-                      <linearGradient id="colorSales" x1="0" y1="0" x2="0" y2="1">
-                        <stop offset="5%" stopColor="#ffd900" stopOpacity={0.3}/>
-                        <stop offset="95%" stopColor="#ffd900" stopOpacity={0}/>
-                      </linearGradient>
-                    </defs>
-                    <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#2d2d2d" />
-                    <XAxis 
-                      dataKey="name" 
-                      axisLine={false} 
-                      tickLine={false} 
-                      tick={{fill: '#64748b', fontSize: 10, fontWeight: 700}} 
-                    />
-                    <YAxis hide />
-                    <Tooltip 
-                      contentStyle={{backgroundColor: '#141414', border: '1px solid #2d2d2d', borderRadius: '12px', fontSize: '12px'}}
-                      itemStyle={{color: '#ffd900', fontWeight: 'bold'}}
-                      cursor={{ stroke: '#ffd900', strokeWidth: 1, strokeDasharray: '5 5' }}
-                    />
-                    <Area 
-                      type="monotone" 
-                      dataKey="sales" 
-                      stroke="#ffd900" 
-                      strokeWidth={3} 
-                      fillOpacity={1} 
-                      fill="url(#colorSales)" 
-                      animationDuration={1500}
-                    />
-                  </AreaChart>
-                </ResponsiveContainer>
+              <div className="lg:col-span-4">
+                <ProfitEvolutionChart data={profitLineData} />
+              </div>
+              <div className="lg:col-span-3">
+                <FinancialStatusChart data={financialStatusData} />
               </div>
             </div>
-          </div>
-        </div>
-      </main>
+          </section>
+
+          {/* GRUPO 3: ESTOQUE */}
+          <section className="space-y-4">
+            <div className="flex items-center gap-2 border-b border-slate-200/80 pb-2">
+              <span
+                style={{ color: dashboardTheme.primaryRed }}
+                className="material-symbols-outlined text-xl"
+              >
+                inventory
+              </span>
+              <h2
+                style={{ color: dashboardTheme.textPrimary }}
+                className="text-sm font-black uppercase tracking-wider"
+              >
+                Controle do Almoxarifado & Estoque
+              </h2>
+            </div>
+
+            {/* 4 CARDS ESTOQUE */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+              {/* 9. VALOR EM ESTOQUE */}
+              <KPICard
+                index={8}
+                title="Valor em Estoque"
+                value={formatCurrency(kpis.valorEstoque)}
+                changeText="Patrimônio"
+                isPositive={null}
+                comparisonText="Capital imobilizado em mercadorias"
+                iconName="inventory_2"
+                badgeType="primary"
+              />
+
+              {/* 10. PRODUTOS CADASTRADOS */}
+              <KPICard
+                index={9}
+                title="Produtos Cadastrados"
+                value={`${kpis.totalProdutos} itens`}
+                changeText="Ativos"
+                isPositive={true}
+                comparisonText="Catálogo total do sistema"
+                iconName="format_list_bulleted"
+                badgeType="slate"
+              />
+
+              {/* 11. ESTOQUE BAIXO */}
+              <KPICard
+                index={10}
+                title="Estoque Baixo"
+                value={`${kpis.lowStockCount} itens`}
+                changeText={kpis.lowStockCount > 0 ? "Atenção" : "OK"}
+                isPositive={kpis.lowStockCount === 0}
+                comparisonText="Abaixo do limite mínimo"
+                iconName="warning"
+                badgeType="warning"
+              />
+
+              {/* 12. PRODUTOS ESGOTADOS */}
+              <KPICard
+                index={11}
+                title="Produtos Esgotados"
+                value={`${kpis.outOfStockCount} esgotados`}
+                changeText={kpis.outOfStockCount > 0 ? "Crítico" : "OK"}
+                isPositive={kpis.outOfStockCount === 0}
+                comparisonText="Sem saldo no estoque (zero)"
+                iconName="production_quantity_limits"
+                badgeType={kpis.outOfStockCount > 0 ? "danger" : "success"}
+              />
+            </div>
+
+            {/* GRÁFICOS DE ESTOQUE */}
+            <StockAnalysisChart
+              topStockData={topProductsByStockValue}
+              topSalesData={topProductsBySales}
+            />
+          </section>
+
+          {/* SEÇÃO 4: ALERTAS & OPERAÇÕES RECENTES */}
+          <section className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <div className="lg:col-span-2">
+              {/*<RecentSales /*sales={recentSales} />*/}
+            </div>
+            <div className="lg:col-span-1">
+              <AlertsPanel alerts={alerts} />
+            </div>
+          </section>
+        </>
+      )}
     </div>
   );
 };

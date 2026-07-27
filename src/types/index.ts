@@ -4,3 +4,4 @@ export * from "./cart";
 export * from "./payment";
 export * from "./invoice";
 export * from "./sidebar";
+export * from './dashboard'
