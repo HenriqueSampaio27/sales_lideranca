@@ -28,6 +28,7 @@ export const KPICard: React.FC<KPICardProps> = ({
   highlightTag,
 }) => {
   const getBadgeStyle = () => {
+    
     switch (badgeType) {
       case "danger":
         return {

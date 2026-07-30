@@ -3,7 +3,9 @@ export interface DashboardInvoice {
   invoice_id?: string;
   customer_name?: string;
   client?: string;
-  issue_date?: string;
+  due_date?: string;
+  issue_date?:string;
+  total_paid?: string;
   created_at?: string;
   total_amount?: number | string;
   status?: "PAGO" | "PENDENTE" | "CANCELADO" | string;
@@ -11,7 +13,7 @@ export interface DashboardInvoice {
 }
 
 export interface DashboardProduct {
-  id: string;
+  id: number ;
   product_name: string;
   category?: string;
   stock: number | string;
@@ -23,7 +25,9 @@ export interface DashboardProduct {
 }
 
 export interface DashboardInvItems {
-  id?: string;
+  id?: number;
+  product_id: string;
+  invoice_id: string;
   product_name?: string;
   cost_price?: number
   sales_count?: number;
@@ -69,9 +73,9 @@ export interface PaymentDistributionPoint {
 export interface FinancialMonthlyPoint {
   name: string;
   receita: number;
-  custos: number;
   despesas: number;
   lucro: number;
+  lucroReal: number;
 }
 
 export interface ProfitLinePoint {
@@ -84,6 +88,14 @@ export interface FinancialStatusPoint {
   name: string;
   valor: number;
   color: string;
+}
+
+export interface FinancialEvolutionPoint {
+  name: string;
+  faturamento: number;
+  lucro: number;
+  pendentes: number;
+  totalNotas: number;
 }
 
 export interface TopProductStockPoint {

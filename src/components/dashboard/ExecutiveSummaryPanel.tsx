@@ -119,7 +119,7 @@ export const ExecutiveSummaryPanel: React.FC<ExecutiveSummaryProps> = ({
               <strong className="font-extrabold text-slate-950">
                 {formatCurrency(duplicatesValue)}
               </strong>{" "}
-              em duplicatas faturadas a receber.
+              em duplicatas faturadas a pagar.
             </p>
           </div>
         </div>

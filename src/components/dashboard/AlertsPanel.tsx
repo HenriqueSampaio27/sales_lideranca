@@ -1,6 +1,6 @@
 import React from "react";
 import { dashboardTheme } from "../../theme/dashboardTheme";
-import { AlertItem } from "../../hooks/useDashboard";
+import { AlertItem } from "../../types/dashboard";
 
 interface AlertsPanelProps {
   alerts: AlertItem[];

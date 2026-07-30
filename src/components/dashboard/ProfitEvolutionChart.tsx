@@ -9,7 +9,8 @@ import {
   Tooltip,
 } from "recharts";
 import { dashboardTheme } from "../../theme/dashboardTheme";
-import { ProfitLinePoint, formatCurrency } from "../../hooks/useDashboard";
+import { formatCurrency } from "../../hooks/useDashboard";
+import { ProfitLinePoint } from "@/src/types";
 
 interface ProfitEvolutionChartProps {
   data: ProfitLinePoint[];

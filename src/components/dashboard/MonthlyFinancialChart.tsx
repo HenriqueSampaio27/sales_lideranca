@@ -10,7 +10,8 @@ import {
   Legend,
 } from "recharts";
 import { dashboardTheme } from "../../theme/dashboardTheme";
-import { FinancialMonthlyPoint, formatCurrency } from "../../hooks/useDashboard";
+import { formatCurrency } from "../../hooks/useDashboard";
+import { FinancialMonthlyPoint } from "@/src/types";
 
 interface MonthlyFinancialChartProps {
   data: FinancialMonthlyPoint[];
@@ -75,7 +76,7 @@ export const MonthlyFinancialChart: React.FC<MonthlyFinancialChartProps> = ({ da
             style={{ color: dashboardTheme.textSecondary }}
             className="text-xs font-medium mt-0.5"
           >
-            Comparativo entre Receita Bruta, Custos (CPV), Despesas e Lucro Líquido
+            Comparativo entre Receita Bruta, Despesas e Lucro Líquido
           </p>
         </div>
       </div>
@@ -108,7 +109,6 @@ export const MonthlyFinancialChart: React.FC<MonthlyFinancialChartProps> = ({ da
               iconType="circle"
             />
             <Bar dataKey="receita" name="Receita" fill="#0F172A" radius={[4, 4, 0, 0]} />
-            <Bar dataKey="custos" name="Custos (CPV)" fill="#64748B" radius={[4, 4, 0, 0]} />
             <Bar dataKey="despesas" name="Despesas" fill="#DC2626" radius={[4, 4, 0, 0]} />
             <Bar dataKey="lucro" name="Lucro Líquido" fill="#16A34A" radius={[4, 4, 0, 0]} />
           </BarChart>

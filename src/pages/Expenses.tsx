@@ -15,6 +15,7 @@ import {
   getExpenseAlerts,
   calculateAlertValue,
   formatCurrency,
+  filterExpenses,
 } from '../utils/expensesUtils';
 import { colors, borderRadius, typography, shadows, animations } from '../theme';
 
@@ -76,10 +77,14 @@ export const Expenses: React.FC = () => {
   }, []);
 
   // DERIVED VALUES (useMemo)
+
+  const filteredData = useMemo(() => {
+    return filterExpenses(data, filters)
+  },[data, filters])
+
   const pendingTotal = useMemo(() => {
-    const pendingData = data.filter((item) => item.status === 'pending' || item.status === 'delayed');
-    return calculateTotalExpenses(pendingData);
-  }, [data]);
+    return calculateTotalExpenses(filteredData);
+  }, [filteredData]);
 
   const upcomingCount = useMemo(() => {
     return getUpcomingExpenses(data).length;

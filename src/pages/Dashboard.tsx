@@ -9,7 +9,7 @@ import { ProfitEvolutionChart } from "../components/dashboard/ProfitEvolutionCha
 import { FinancialStatusChart } from "../components/dashboard/FinancialStatusChart";
 import { StockAnalysisChart } from "../components/dashboard/StockAnalysisChart";
 import { AlertsPanel } from "../components/dashboard/AlertsPanel";
-import { RecentSales } from "../components/dashboard/RecentSales";
+import FinancialEvolutionChart from "../components/dashboard/FinancialEvolutionChart";
 
 export const Dashboard: React.FC = () => {
   const {
@@ -23,6 +23,7 @@ export const Dashboard: React.FC = () => {
     monthlyFinancialData,
     profitLineData,
     financialStatusData,
+    financialEvolution,
     topProductsByStockValue,
     topProductsBySales,
     alerts,
@@ -120,8 +121,8 @@ export const Dashboard: React.FC = () => {
                 index={0}
                 title="Faturamento Total"
                 value={formatCurrency(kpis.faturamentoTotal)}
-                changeText="+14.2%"
-                isPositive={true}
+                changeText={`${kpis.variacaoFaturamento >= 0 ? "+" : ""}${kpis.variacaoFaturamento.toFixed(1)}%`}
+                isPositive={kpis.variacaoFaturamento >= 0}
                 comparisonText="vs. mês anterior"
                 iconName="payments"
                 badgeType="primary"
@@ -134,9 +135,9 @@ export const Dashboard: React.FC = () => {
                 title="Lucro Estimado"
                 value={formatCurrency(kpis.lucroReal)}
                 subValue={`Margem Líquida: ${kpis.margemLucroPct.toFixed(1)}%`}
-                changeText="+9.8%"
-                isPositive={true}
-                comparisonText="Faturamento - CPV - Despesas"
+                changeText={`${kpis.variacaoLucro >= 0 ? "+" : ""}${kpis.variacaoLucro.toFixed(1)}%`}
+                isPositive={kpis.variacaoLucro >= 0}
+                comparisonText="Lucro Líquido"
                 iconName="trending_up"
                 badgeType="success"
                 highlightTag="Líquido"
@@ -147,9 +148,9 @@ export const Dashboard: React.FC = () => {
                 index={2}
                 title="Total de Vendas"
                 value={`${kpis.vendasCount} pedidos`}
-                changeText="+6.5%"
-                isPositive={true}
-                comparisonText="Pedidos concluídos no PDV"
+                changeText={`${kpis.variacaoVendas >= 0 ? "+" : ""}${kpis.variacaoVendas.toFixed(1)}%`}
+                isPositive={kpis.variacaoVendas >= 0}
+                comparisonText="Comparado aos últimos 30 dias"
                 iconName="shopping_bag"
                 badgeType="info"
               />
@@ -159,7 +160,6 @@ export const Dashboard: React.FC = () => {
                 index={3}
                 title="Clientes Ativos"
                 value={`${kpis.clientesAtivos} clientes`}
-                changeText="+12 novos"
                 isPositive={true}
                 comparisonText="Base de clientes cadastrada"
                 iconName="group"
@@ -218,7 +218,7 @@ export const Dashboard: React.FC = () => {
                 index={6}
                 title="Despesas do Período"
                 value={formatCurrency(kpis.totalExpenses)}
-                changeText="-3.2%"
+                
                 isPositive={true}
                 comparisonText="Contas pagas e operacionais"
                 iconName="price_check"
@@ -230,11 +230,11 @@ export const Dashboard: React.FC = () => {
                 index={7}
                 title="Margem de Lucro"
                 value={`${kpis.margemLucroPct.toFixed(1)}%`}
-                changeText="Saudável"
+                changeText={`${kpis.margemLucroPct >= 0 ? "Saudável" : "Crítico"}`}
                 isPositive={true}
                 comparisonText="Percentual sobre receita"
                 iconName="pie_chart"
-                badgeType="success"
+                badgeType={kpis.margemLucroPct >= 0 ? "success" : "danger"}
                 highlightTag="Rentabilidade"
               />
             </div>
@@ -250,6 +250,9 @@ export const Dashboard: React.FC = () => {
               <div className="lg:col-span-3">
                 <FinancialStatusChart data={financialStatusData} />
               </div>
+            </div>
+            <div className="grid grid-cols-0 lg:grid-cols-1 gap-6">
+              <FinancialEvolutionChart data={financialEvolution} />
             </div>
           </section>
 
@@ -278,10 +281,10 @@ export const Dashboard: React.FC = () => {
                 title="Valor em Estoque"
                 value={formatCurrency(kpis.valorEstoque)}
                 changeText="Patrimônio"
-                isPositive={null}
+                isPositive={true}
                 comparisonText="Capital imobilizado em mercadorias"
                 iconName="inventory_2"
-                badgeType="primary"
+                badgeType="success"
               />
 
               {/* 10. PRODUTOS CADASTRADOS */}

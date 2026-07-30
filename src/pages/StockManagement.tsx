@@ -56,8 +56,8 @@ const StockManagement: React.FC = () => {
   const toggleActive = async (prod: Product) => {
     try {
       const updatedProduct = { ...prod, active: !prod.active };
-      const res = await fetch(`${baseUrl}/product/${prod.id}`, {
-        method: "PUT",
+      const res = await fetch(`${baseUrl}/product/${prod.id}/active`, {
+        method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(updatedProduct),
       });

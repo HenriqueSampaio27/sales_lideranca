@@ -6,7 +6,7 @@ import {
   updateProduct,
   deleteProduct,
   toggleProductStatus,
-} from "../services/ProductService";
+} from "../services/productService";
 import { Product, ProductFormData } from "../types/product";
 import ProductFilters from "../components/products/ProductFilters";
 import ProductTable from "../components/products/ProductTable";

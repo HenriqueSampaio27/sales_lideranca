@@ -11,8 +11,10 @@ import { DashboardInvoice,
   TopProductStockPoint,
   TopProductSalesPoint,
   AlertItem,
-  DashboardInvItems
+  DashboardInvItems,
+  FinancialEvolutionPoint
  } from "../types/dashboard";
+import { buildMonthlyFinancialData } from "../utils/buildMonthlyFinancialData";
 
 export type PeriodFilter = "today" | "7d" | "30d" | "6m" | "1y";
 
@@ -94,7 +96,7 @@ export function useDashboard() {
         } else {
           setClientsCount(148);
         }
-        console.log(inv_items)
+        
       } catch (err) {
         console.error("Erro ao carregar dados do Dashboard:", err);
         setError("Servidor offline. Exibindo dados integrados em modo de demonstração.");
@@ -161,9 +163,53 @@ export function useDashboard() {
       0
     );
 
+    const now = new Date();
+    const startCurrent = new Date(now);
+    startCurrent.setDate(startCurrent.getDate() - 30);
+
+    const endCurrent = new Date(startCurrent);
+    endCurrent.setDate(endCurrent.getDate() - 30);
+
+    const currentInvoices = invoices.filter(inv => {
+
+        if (!inv.issue_date) return false;
+
+        const date = new Date(inv.issue_date);
+        return date >= startCurrent && date <= now;
+    });
+
+    const previousInvoices = invoices.filter(inv => {
+
+        if (!inv.issue_date) return false;
+
+        const date = new Date(inv.issue_date);
+        return date >= endCurrent && date < startCurrent;
+    });
+
+    const invoiceIdsAtuais = new Set(
+      currentInvoices.map((inv) => inv.id));
+    const itensAtuais = invoiceItems.filter((item) =>
+      invoiceIdsAtuais.has(item.invoice_id)
+    );
+
+    const invoiceIdsAnterior = new Set(
+      previousInvoices.map((inv) => inv.id));
+    const itensAnteriores = invoiceItems.filter((item) =>
+      invoiceIdsAnterior.has(item.invoice_id)
+    );  
+
+
+
+    const faturamentoAtual = currentInvoices.reduce((t, i) => 
+      t + Number(i.total_amount), 0
+    )
+
+    const faturamentoAnterior = previousInvoices.reduce((t, i) => 
+      t + Number(i.total_amount), 0
+    )
+
     // Custo dos Produtos Vendidos (CPV)
     const cpv = invoiceItems.reduce((total, item) => {
-      console.log(item.cost_price)
       return (
         total +
         (Number(item.cost_price) || 0) *
@@ -171,6 +217,23 @@ export function useDashboard() {
       );
     }, 0);
 
+    const cpvAtual = itensAtuais.reduce((total, item) => {
+      return (
+        total +
+        (Number(item.cost_price) || 0) *
+        (Number(item.quantity) || 0)
+      );
+    }, 0);
+
+    const cpvAnterior = itensAnteriores.reduce((total, item) => {
+      return (
+        total +
+        (Number(item.cost_price) || 0) *
+        (Number(item.quantity) || 0)
+      );
+    }, 0);
+
+    //lucro total
     const lucroRealBruto = faturamentoTotal - cpv
     const lucroReal = faturamentoTotal - cpv - totalExpenses;
 
@@ -180,23 +243,61 @@ export function useDashboard() {
         ? (lucroReal / faturamentoTotal) * 100
         : 0;
 
+    //lucro atual
+    const lucroRealBrutoAtual = faturamentoAtual - cpvAtual
+
+    // Margem de Lucro %
+    const margemLucroPctAtual =
+      faturamentoTotal > 0
+        ? (lucroRealBrutoAtual / faturamentoAtual) * 100
+        : 0;
+
+    //lucro anterior
+    const lucroRealBrutoAnterior = faturamentoAnterior - cpvAnterior
+
+    // Margem de Lucro %
+    const margemLucroPctAnterior =
+      faturamentoTotal > 0
+        ? (lucroRealBrutoAnterior / faturamentoAnterior) * 100
+        : 0;
+
+    const variacaoFaturamento =
+      faturamentoAnterior > 0
+        ? ((faturamentoAtual - faturamentoAnterior) / faturamentoAnterior) * 100
+        : 0;
+
+    const variacaoLucro =
+      lucroRealBrutoAnterior > 0
+        ? ((lucroRealBrutoAtual - lucroRealBrutoAnterior) / lucroRealBrutoAnterior) * 100
+        : 0;
+
+    //total de vendas atuais e anteriores
+    const vendasCountAtual = currentInvoices.length;
+    const vendasCountAnterior = previousInvoices.length;
+
+    const variacaoVendas =
+      vendasCountAnterior > 0
+      ? ((vendasCountAtual - vendasCountAnterior) / vendasCountAnterior) * 100
+      : 0;
+
     // Estoque
     let valorEstoque = 0;
     let outOfStockCount = 0;
     let lowStockCount = 0;
-    const totalProdutos = products.length;
+    let totalProdutos = 0;
 
     products.forEach((p) => {
-      if (p.active !== false) {
+      if (p.active === true) {
         const stk = Number(p.stock) || 0;
         const cost = Number(p.price_cost) || 0;
-        const minStk = Number(p.minStock) || 5;
-
+        const minStk = Number(p.minStock) || 0;
+        
+        totalProdutos += 1;
         valorEstoque += stk * cost;
 
         if (stk === 0) {
           outOfStockCount += 1;
-        } else if (stk <= minStk) {
+        } else if (stk <= minStk && stk  > 0) {
           lowStockCount += 1;
         }
       }
@@ -207,7 +308,12 @@ export function useDashboard() {
       lucroReal,
       lucroRealBruto,
       margemLucroPct,
+      margemLucroPctAnterior,
+      margemLucroPctAtual,
+      variacaoFaturamento,
+      variacaoLucro,
       vendasCount,
+      variacaoVendas,
       clientesAtivos: clientsCount,
       pendingInvoicesValue,
       pendingInvoicesCount,
@@ -223,39 +329,170 @@ export function useDashboard() {
     };
   }, [invoices, products, duplicates, expenses, clientsCount]);
 
-  // Gráfico Financeiro Mensal (Receita x Custos x Despesas x Lucro)
-  const monthlyFinancialData = useMemo<FinancialMonthlyPoint[]>(() => {
-    return [
-      { name: "Fev", receita: 140000, custos: 63000, despesas: 32000, lucro: 45000 },
-      { name: "Mar", receita: 165000, custos: 74250, despesas: 38000, lucro: 52750 },
-      { name: "Abr", receita: 180000, custos: 81000, despesas: 41000, lucro: 58000 },
-      { name: "Mai", receita: 210000, custos: 94500, despesas: 48000, lucro: 67500 },
-      { name: "Jun", receita: 195000, custos: 87750, despesas: 44000, lucro: 63250 },
-      { name: "Jul", receita: kpis.faturamentoTotal, custos: kpis.cpv, despesas: kpis.totalExpenses, lucro: kpis.lucroReal },
-    ];
-  }, [kpis]);
+  // Gráfico Financeiro Mensal (Receita x Despesas x Lucro)
+  const monthlyFinancialData = useMemo(() => {
+    return buildMonthlyFinancialData(
+      invoices,
+      duplicates,
+      expenses,
+      invoiceItems
+    );
+  }, [invoices, duplicates, expenses, invoiceItems]);
 
   // Gráfico de Evolução de Lucro
   const profitLineData = useMemo<ProfitLinePoint[]>(() => {
     return monthlyFinancialData.map((d) => ({
       name: d.name,
-      lucro: d.lucro,
-      margemPct: d.receita > 0 ? Number(((d.lucro / d.receita) * 100).toFixed(1)) : 0,
+      lucro: d.lucroReal,
+      margemPct:
+        d.receita > 0
+          ? Number(((d.lucroReal / d.receita) * 100).toFixed(1))
+          : 0,
     }));
   }, [monthlyFinancialData]);
 
   // Gráfico Status Financeiro (Donut: Recebido x Pendente x Atrasado)
   const financialStatusData = useMemo<FinancialStatusPoint[]>(() => {
-    const delayedDups = duplicates
-      .filter((d) => d.status === "delayed")
-      .reduce((a, b) => a + (Number(b.value) || 0), 0);
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    let recebido = 0;
+    let pendente = 0;
+    let atrasado = 0;
+
+    invoices.forEach((invoice) => {
+      const total =
+        Number(invoice.total_amount ?? 0) -
+        Number(invoice.total_paid ?? 0);
+
+      // Recebido
+      if (invoice.status === "PAGO") {
+        recebido += Number(invoice.total_amount ?? 0);
+        return;
+      }
+
+      // Apenas notas pendentes entram nas próximas regras
+      if (invoice.status !== "PENDENTE") return;
+
+      const dueDate = invoice.due_date
+        ? new Date(invoice.due_date)
+        : null;
+
+      if (!dueDate) return;
+
+      dueDate.setHours(0, 0, 0, 0);
+
+      // Ainda não venceu
+      if (dueDate >= today) {
+        pendente += total;
+      }
+      // Já venceu
+      else {
+        atrasado += total;
+      }
+    });
 
     return [
-      { name: "Recebido", valor: kpis.faturamentoTotal, color: "#16A34A" },
-      { name: "Pendente", valor: kpis.pendingInvoicesValue + (kpis.duplicatesValue - delayedDups), color: "#D97706" },
-      { name: "Atrasado", valor: delayedDups > 0 ? delayedDups : 18500, color: "#DC2626" },
-    ];
-  }, [kpis, duplicates]);
+      {
+        name: "Recebido",
+        valor: recebido,
+        color: "#16A34A",
+      },
+      {
+        name: "Pendente",
+        valor: pendente,
+        color: "#D97706",
+      },
+      {
+        name: "Atrasado",
+        valor: atrasado,
+        color: "#DC2626",
+      },
+      ];
+  }, [invoices]);
+
+  //Gráfico de lucro x notas faturadas x notas pendentes x notas pagas
+  const financialEvolution = useMemo<FinancialEvolutionPoint[]>(() => {
+    const hoje = new Date();
+    hoje.setHours(23, 59, 59, 999);
+
+    const inicio = new Date();
+    inicio.setDate(hoje.getDate() - 29);
+    inicio.setHours(0, 0, 0, 0);
+
+    //cvp
+    const cpvPorInvoice = new Map<string, number>();
+
+    invoiceItems.forEach((item) => {
+
+      const invoiceId = String(item.invoice_id);
+
+      const atual = cpvPorInvoice.get(invoiceId) || 0;
+      
+      cpvPorInvoice.set(
+        invoiceId,
+        atual +
+          (Number(item.cost_price) || 0) *
+          (Number(item.quantity) || 0)
+      );
+
+      
+    });
+
+    // Cria os últimos 30 dias
+    const result: FinancialEvolutionPoint[] = [];
+
+    for (let i = 0; i < 30; i++) {
+      const dia = new Date(inicio);
+      dia.setDate(inicio.getDate() + i);
+
+      result.push({
+        name: dia.toLocaleDateString("pt-BR", {
+          day: "2-digit",
+          month: "2-digit",
+        }),
+        faturamento: 0,
+        lucro: 0,
+        pendentes: 0,
+        totalNotas: 0,
+      });
+    }
+
+    invoices.forEach((invoice) => {
+
+      
+      if (!invoice.issue_date) return;
+
+      const data = new Date(invoice.issue_date);
+
+      if (data < inicio || data > hoje) return;
+      
+      const index = Math.floor(
+        (data.getTime() - inicio.getTime()) /
+          (1000 * 60 * 60 * 24)
+      );
+
+      if (index < 0 || index >= result.length) return;
+
+      const total = Number(invoice.total_amount) || 0;
+
+      result[index].totalNotas += total;
+
+      if (invoice.status === "PAGO") {
+        result[index].faturamento += total;
+
+        const cpv = cpvPorInvoice.get(String(invoice.id)) || 0;
+
+        result[index].lucro += total - cpv;
+      }
+
+      if (invoice.status === "PENDENTE") {
+        result[index].pendentes += total;
+      }
+    });
+   
+    return result;
+  }, [invoices, invoiceItems]);
 
   // Estoque: Top 5 Produtos com Maior Valor Imobilizado
   const topProductsByStockValue = useMemo<TopProductStockPoint[]>(() => {
@@ -273,16 +510,27 @@ export function useDashboard() {
       .slice(0, 5);
   }, [products]);
 
-  // Estoque: Produtos com Maior Saída/Giro
   const topProductsBySales = useMemo<TopProductSalesPoint[]>(() => {
-    return [
-      { name: "Cimento CP II 50kg", vendas: 420 },
-      { name: "Argamassa ACIII 20kg", vendas: 310 },
-      { name: "Tijolo Baiano 6 Furos", vendas: 280 },
-      { name: "Tinta Acrílica Coral 18L", vendas: 195 },
-      { name: "Piso Cerâmico 60x60", vendas: 140 },
-    ];
-  }, []);
+    const salesMap = new Map<number, number>();
+
+    // Soma a quantidade vendida de cada produto
+    invoiceItems.forEach((item) => {
+      const productId = Number(item.product_id);
+      const qty = Number(item.quantity) || 0;
+
+      salesMap.set(productId, (salesMap.get(productId) || 0) + qty);
+    });
+
+    // Junta com os produtos para obter o nome
+    return products
+      .map((product) => ({
+        name: product.product_name,
+        vendas: salesMap.get(product.id) || 0,
+      }))
+      .sort((a, b) => b.vendas - a.vendas)
+      .slice(0, 5);
+
+  }, [invoiceItems, products]);
 
   // Painel de Alertas
   const alerts = useMemo<AlertItem[]>(() => {
@@ -297,6 +545,7 @@ export function useDashboard() {
         badgeText: "Ação Urgente",
         countOrValue: `${kpis.outOfStockCount} itens`,
         iconName: "production_quantity_limits",
+        
       });
     }
 
@@ -360,7 +609,7 @@ export function useDashboard() {
     return invoices.slice(0, 8).map((inv, idx) => ({
       id: inv.id || inv.invoice_id || `INV-${idx + 100}`,
       cliente: inv.customer_name || inv.client || "Cliente Balcão",
-      data: formatDate(inv.issue_date || inv.created_at),
+      data: formatDate(inv.due_date || inv.created_at),
       valor: Number(inv.total_amount) || 0,
       pagamento:
         typeof inv.payment_method === "string"
@@ -381,6 +630,7 @@ export function useDashboard() {
     monthlyFinancialData,
     profitLineData,
     financialStatusData,
+    financialEvolution,
     topProductsByStockValue,
     topProductsBySales,
     alerts,
@@ -432,21 +682,21 @@ function formatDateSimple(dateStr?: string): string {
 
 // Fallbacks realistas caso o backend retorne vazio ou erro de conexão
 const fallbackInvoices: DashboardInvoice[] = [
-  { id: "INV-9041", customer_name: "Construtora Silva & Costa", total_amount: 14500, status: "PAGO", payment_method: "PIX", issue_date: "2026-07-25" },
-  { id: "INV-9042", customer_name: "Marcos Oliveira Pedreiro", total_amount: 3280, status: "PAGO", payment_method: "Cartão de Crédito", issue_date: "2026-07-25" },
-  { id: "INV-9043", customer_name: "Residencial Bela Vista Ltda", total_amount: 28900, status: "PENDENTE", payment_method: "Boleto Faturado", issue_date: "2026-07-24" },
-  { id: "INV-9044", customer_name: "Marmoraria Guanabara", total_amount: 8750, status: "PAGO", payment_method: "PIX", issue_date: "2026-07-24" },
-  { id: "INV-9045", customer_name: "Engenharia Alvorada", total_amount: 19400, status: "PAGO", payment_method: "Cartão de Débito", issue_date: "2026-07-23" },
-  { id: "INV-9046", customer_name: "João da Silva (Particular)", total_amount: 1120, status: "PAGO", payment_method: "Dinheiro", issue_date: "2026-07-23" },
+  { id: "INV-9041", customer_name: "Construtora Silva & Costa", total_amount: 14500, status: "PAGO", payment_method: "PIX", due_date: "2026-07-25" },
+  { id: "INV-9042", customer_name: "Marcos Oliveira Pedreiro", total_amount: 3280, status: "PAGO", payment_method: "Cartão de Crédito", due_date: "2026-07-25" },
+  { id: "INV-9043", customer_name: "Residencial Bela Vista Ltda", total_amount: 28900, status: "PENDENTE", payment_method: "Boleto Faturado", due_date: "2026-07-24" },
+  { id: "INV-9044", customer_name: "Marmoraria Guanabara", total_amount: 8750, status: "PAGO", payment_method: "PIX", due_date: "2026-07-24" },
+  { id: "INV-9045", customer_name: "Engenharia Alvorada", total_amount: 19400, status: "PAGO", payment_method: "Cartão de Débito", due_date: "2026-07-23" },
+  { id: "INV-9046", customer_name: "João da Silva (Particular)", total_amount: 1120, status: "PAGO", payment_method: "Dinheiro", due_date: "2026-07-23" },
 ];
 
 const fallbackProducts: DashboardProduct[] = [
-  { id: "P1", product_name: "Cimento CP II 50kg Votoran", category: "Básico", stock: 120, minStock: 50, price_cost: 32.5, price_sell: 42.0, active: true },
-  { id: "P2", product_name: "Tijolo Baiano 6 Furos 10x19x19", category: "Básico", stock: 0, minStock: 500, price_cost: 0.85, price_sell: 1.4, active: true },
-  { id: "P3", product_name: "Argamassa ACIII 20kg Quartzolit", category: "Argamassas", stock: 4, minStock: 20, price_cost: 24.0, price_sell: 34.9, active: true },
-  { id: "P4", product_name: "Tinta Acrílica Coral Premium 18L", category: "Tintas", stock: 18, minStock: 10, price_cost: 210.0, price_sell: 319.0, active: true },
-  { id: "P5", product_name: "Piso Cerâmico 60x60 Extra HD", category: "Revestimentos", stock: 450, minStock: 100, price_cost: 28.0, price_sell: 45.0, active: true },
-  { id: "P6", product_name: "Tubos PVC 100mm Esgoto Amanco", category: "Hidráulica", stock: 65, minStock: 30, price_cost: 42.0, price_sell: 68.0, active: true },
+  { id: 1, product_name: "Cimento CP II 50kg Votoran", category: "Básico", stock: 120, minStock: 50, price_cost: 32.5, price_sell: 42.0, active: true },
+  { id: 2, product_name: "Tijolo Baiano 6 Furos 10x19x19", category: "Básico", stock: 0, minStock: 500, price_cost: 0.85, price_sell: 1.4, active: true },
+  { id: 3, product_name: "Argamassa ACIII 20kg Quartzolit", category: "Argamassas", stock: 4, minStock: 20, price_cost: 24.0, price_sell: 34.9, active: true },
+  { id: 4, product_name: "Tinta Acrílica Coral Premium 18L", category: "Tintas", stock: 18, minStock: 10, price_cost: 210.0, price_sell: 319.0, active: true },
+  { id: 5, product_name: "Piso Cerâmico 60x60 Extra HD", category: "Revestimentos", stock: 450, minStock: 100, price_cost: 28.0, price_sell: 45.0, active: true },
+  { id: 6, product_name: "Tubos PVC 100mm Esgoto Amanco", category: "Hidráulica", stock: 65, minStock: 30, price_cost: 42.0, price_sell: 68.0, active: true },
 ];
 
 const fallbackDuplicates: DashboardDuplicate[] = [

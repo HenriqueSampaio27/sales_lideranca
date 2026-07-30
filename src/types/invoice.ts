@@ -6,7 +6,7 @@ export interface InvoiceItemPayload {
   unit_price_original: number;
   discount_value: number;
   unit_price_final: number;
-  price_cost: number;
+  cost_price: number;
 }
 
 export interface CreateInvoicePayload {

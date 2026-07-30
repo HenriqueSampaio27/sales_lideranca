@@ -3,9 +3,7 @@ import { baseUrl } from "./AuthService";
 import { apiRequest } from "./apiClient";
 
 export class InvoiceService {
-  static async createInvoice(
-    payload: CreateInvoicePayload
-  ): Promise<CreateInvoiceResponse> {
+  static async createInvoice(payload: CreateInvoicePayload): Promise<CreateInvoiceResponse> {
     return apiRequest<CreateInvoiceResponse>("/invoices", {
       method: "POST",
       body: JSON.stringify(payload),

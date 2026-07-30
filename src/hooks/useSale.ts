@@ -35,16 +35,17 @@ export function useSale({
       try {
         const payloadItems = cartState.cart.map((item) => {
           const discountVal = cartState.getItemDiscountValue(item);
+          console.log(item.cost_price)
           return {
             product_id: item.id,
             quantity: item.qty,
             unit_price_original: item.unit,
             discount_value: discountVal,
             unit_price_final: item.unit - discountVal,
-            price_cost: item.cost_price
+            cost_price: item.cost_price
           };
         });
-
+  
         const payload = {
           customer_id: clientsState.selectedClient?.id || null,
           user_id: null,
@@ -60,7 +61,6 @@ export function useSale({
           setSaleCompleted(true)
         }else{
           const response = await InvoiceService.createInvoice(payload);
-
           if (response.invoice_id) {
             setLastInvoiceId(response.invoice_id);
             setSaleCompleted(true);
