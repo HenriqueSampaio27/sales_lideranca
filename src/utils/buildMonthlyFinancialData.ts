@@ -125,7 +125,6 @@ const invoiceMap = new Map(
       });
     }
 
-    months.get(key)!.despesas += Number(expense.value) || 0;
     months.get(key)!.expenses += Number(expense.value) || 0;
 
   });
@@ -168,9 +167,10 @@ const invoiceMap = new Map(
       return {
         name: monthNames[Number(month)],
         receita: values.receita,
-        despesas: values.despesas,
+        despesas: values.despesas + values.expenses,
         lucro: values.receita - values.despesas,
-        lucroReal: values.receita - values.custos - values.expenses
+        lucroReal: values.receita - values.custos - values.expenses,
+        lucroBruto: values.receita - values.despesas - values.expenses
       };
 
     })

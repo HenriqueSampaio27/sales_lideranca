@@ -76,6 +76,7 @@ export interface FinancialMonthlyPoint {
   despesas: number;
   lucro: number;
   lucroReal: number;
+  lucroBruto: number;
 }
 
 export interface ProfitLinePoint {

@@ -10,6 +10,10 @@ export interface Invoice {
   id: number;
   customer_name: string;
   cnpj_cpf: string;
+  logradouro?: string;
+  city: string;
+  number: string;
+  district?: string;
   invoice_number: string;
   issue_date: string;
   due_date: string | null;

@@ -10,7 +10,6 @@ import {
   SelectedProduct,
   StockFilter,
 } from "../types/stock";
-
 import StockCards from "../components/stock/StockCards";
 import StockFilters from "../components/stock/StockFilters";
 import StockTable from "../components/stock/StockTable";
@@ -45,6 +44,9 @@ const StockManagement: React.FC = () => {
       const res = await fetch(`${baseUrl}/product`);
       if (res.ok) {
         const data = await res.json();
+        data.sort((a: Product, b: Product) =>
+          a.product_name.localeCompare(b.product_name, 'pt-BR', { sensitivity: 'base' })
+        );
         setProducts(data);
       }
     } catch (err) {

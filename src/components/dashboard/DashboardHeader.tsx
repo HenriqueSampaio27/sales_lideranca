@@ -71,7 +71,7 @@ export const DashboardHeader: React.FC<DashboardHeaderProps> = ({
 
       <div className="flex flex-wrap items-center gap-3">
         {/* PERÍODO SELECTOR */}
-        <div
+        {/*<div
           style={{
             backgroundColor: dashboardTheme.bg,
             borderColor: dashboardTheme.border,
@@ -97,7 +97,7 @@ export const DashboardHeader: React.FC<DashboardHeaderProps> = ({
               </button>
             );
           })}
-        </div>
+        </div>*/}
 
         {/* BOTÃO REFRESH */}
         <button

@@ -129,8 +129,8 @@ ${items.rows
       <span>${item.quantity}UN x ${Number(item.unit_price).toFixed(2)}</span>
       <span>${(item.quantity * item.unit_price).toFixed(2)}</span>
     </div>
-    ${
-      discount !== 0
+    ${false
+      //discount !== 0
         ? `<div class="row small">
         <span>Desconto</span>
         <span>${Number(item.discount_value).toLocaleString("pt-BR", {

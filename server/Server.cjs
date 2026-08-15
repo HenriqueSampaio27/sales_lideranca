@@ -584,6 +584,10 @@ app.get('/financial-notes', async (req, res) => {
         i.*,
         c.name AS customer_name,
         c.cnpj_cpf AS cnpj_cpf,
+        c.logradouro AS logradouro
+        c.number AS number,
+        c.city AS city,
+        c.district AS district,
 
         COALESCE(
           json_agg(

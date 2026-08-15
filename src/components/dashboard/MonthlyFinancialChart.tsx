@@ -110,7 +110,7 @@ export const MonthlyFinancialChart: React.FC<MonthlyFinancialChartProps> = ({ da
             />
             <Bar dataKey="receita" name="Receita" fill="#0F172A" radius={[4, 4, 0, 0]} />
             <Bar dataKey="despesas" name="Despesas" fill="#DC2626" radius={[4, 4, 0, 0]} />
-            <Bar dataKey="lucro" name="Lucro Líquido" fill="#16A34A" radius={[4, 4, 0, 0]} />
+            <Bar dataKey="lucroBruto" name="Lucro Mensal" fill="#16A34A" radius={[4, 4, 0, 0]} />
           </BarChart>
         </ResponsiveContainer>
       </div>

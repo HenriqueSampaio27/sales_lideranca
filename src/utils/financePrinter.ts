@@ -74,9 +74,9 @@ export const handlePrintCupom = (invoice: Invoice): void => {
 
           <div class="small">
             Cliente: ${invoice.customer_name || "-"}<br/>
-            Documento: ${invoice.cnpj_cpf || "-"}<br/>
             Data: ${new Date(invoice.issue_date).toLocaleString("pt-BR")}<br/>
-            Nº: ${invoice.invoice_number}
+            Nº: ${invoice.invoice_number}<br/>
+            ${invoice.logradouro? `End.: ${invoice.logradouro + ", " + invoice.number + ", " +invoice.district}`: ""}
           </div>
 
           <div class="line"></div>
@@ -104,8 +104,9 @@ export const handlePrintCupom = (invoice: Invoice): void => {
                 currency: "BRL",
               })}</span>
                   </div>
-                  ${
-                    Number(item.discount_value) !== 0
+                  
+                  ${false
+                    //Number(item.discount_value) !== 0
                       ? `<div class="item">
                         <span>Desconto</span>
                         <span>${Number(item.discount_value).toLocaleString("pt-BR", {
