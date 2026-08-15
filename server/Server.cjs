@@ -108,12 +108,11 @@ app.get("/backup", async (req, res) => {
 // 🔐 LOGIN
 app.post('/login', async (req, res) => {
     try {
-        // Use os nomes EXATOS que apareceram no seu console log
+        
         const { username, password } = req.body; 
 
         console.log("Tentando login para:", username);
 
-        // Exemplo de como ficaria a busca no Postgres (pg)
         const result = await pool.query('SELECT * FROM users WHERE username = $1', [username]);
         const user = result.rows[0];
 
@@ -121,14 +120,12 @@ app.post('/login', async (req, res) => {
             return res.status(401).json({ message: "Usuário não encontrado" });
         }
 
-        // Verificação da senha com bcrypt (já que está no seu package.json)
         const senhaValida = await bcrypt.compare(password, user.password);
 
         if (!senhaValida) {
             return res.status(401).json({ message: "Senha incorreta" });
         }
 
-        // Se chegou aqui, login sucesso! (Aqui você geraria o JWT)
         res.json({ message: "Login realizado com sucesso!" });
 
     } catch (error) {
@@ -584,7 +581,7 @@ app.get('/financial-notes', async (req, res) => {
         i.*,
         c.name AS customer_name,
         c.cnpj_cpf AS cnpj_cpf,
-        c.logradouro AS logradouro
+        c.logradouro AS logradouro,
         c.number AS number,
         c.city AS city,
         c.district AS district,
