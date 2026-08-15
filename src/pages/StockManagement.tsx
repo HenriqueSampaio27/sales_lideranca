@@ -160,7 +160,7 @@ const StockManagement: React.FC = () => {
     doc.setFillColor(248, 250, 252);
     doc.rect(0, 0, 210, 20, "F");
 
-    doc.setTextColor(217, 119, 6);
+    doc.setTextColor(255, 0, 0);
     doc.setFontSize(14);
     doc.setFont("helvetica", "bold");
     doc.text("LIDERANÇA CONSTRUÇÕES", 14, 13);
@@ -192,8 +192,6 @@ const StockManagement: React.FC = () => {
         [
           "PRODUTO",
           "MARCA",
-          "ESTOQUE ATUAL",
-          "ESTOQUE MÍN.",
           "QTD. SOLICITADA",
         ],
       ],
@@ -201,7 +199,7 @@ const StockManagement: React.FC = () => {
       theme: "striped",
       headStyles: {
         fillColor: [241, 245, 249],
-        textColor: [217, 119, 6],
+        textColor: [255, 0, 0],
         fontStyle: "bold",
       },
       styles: { fontSize: 8 },
@@ -225,7 +223,7 @@ const StockManagement: React.FC = () => {
     }
 
     if (stockFilter === "minimum") {
-      return matchSearch && stockNum <= minStockNum;
+      return matchSearch && stockNum <= minStockNum && stockNum > 0
     }
 
     return matchSearch;
